@@ -1,22 +1,23 @@
 {
-  "name": "104-job-auto-apply",
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "104-job-auto-apply-marketplace",
   "version": "1.0.0",
   "description": "Automate job applications on 104.com.tw using Playwright MCP tools. Supports single job applications, batch processing, and multi-page automation.",
   "owner": {
     "name": "yennanliu",
-    "url": "https://github.com/yennanliu"
+    "email": "yennanliu@github.com"
   },
-  "repository": "https://github.com/yennanliu/104Skill",
-  "homepage": "https://yennanliu.github.io/104Skill/",
   "plugins": [
     {
       "name": "104-job-auto-apply",
       "description": "Automate job applications on 104.com.tw",
       "version": "1.0.0",
-      "source": "SKILL.md",
-      "commands": [
-        "/104-job-auto-apply"
-      ]
+      "author": {
+        "name": "yennanliu",
+        "email": "yennanliu@github.com"
+      },
+      "source": ".",
+      "category": "productivity"
     }
   ]
 }
