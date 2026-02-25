@@ -155,7 +155,8 @@ const options = {
   maxPages: 5,            // Maximum number of pages to process
   delayMin: 2000,         // Minimum delay between applications (ms)
   delayMax: 4000,         // Maximum delay between applications (ms)
-  coverLetter: '自訂推薦信1'  // Cover letter to use
+  coverLetter: '自訂推薦信1', // Cover letter to use
+  logDir: '.'             // Directory to save result log file (default: current dir)
 };
 ```
 
@@ -167,8 +168,35 @@ async function autoApply104Jobs(page, options = {}) {
     maxPages = 5,
     delayMin = 2000,
     delayMax = 4000,
-    coverLetter = '自訂推薦信1'
+    coverLetter = '自訂推薦信1',
+    logDir = '.'
   } = options;
+
+  // ── Log file setup ───────────────────────────────────────────────────────
+  const fs = require('fs');
+  const path = require('path');
+
+  const runStart = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const dateTag = `${runStart.getFullYear()}${pad(runStart.getMonth()+1)}${pad(runStart.getDate())}`;
+  const timeTag = `${pad(runStart.getHours())}${pad(runStart.getMinutes())}${pad(runStart.getSeconds())}`;
+  const logFile = path.resolve(logDir, `${dateTag}_${timeTag}_result.txt`);
+
+  fs.mkdirSync(path.dirname(logFile), { recursive: true });
+
+  function logLine(text = '') {
+    fs.appendFileSync(logFile, text + '\n', 'utf8');
+  }
+
+  // Write run header to log file
+  logLine('='.repeat(70));
+  logLine('104.com.tw Job Auto-Apply — Run Log');
+  logLine(`Started   : ${runStart.toLocaleString()}`);
+  logLine(`Log File  : ${logFile}`);
+  logLine(`Config    : startPage=${startPage}, maxPages=${maxPages}, coverLetter=${coverLetter}`);
+  logLine('='.repeat(70));
+  logLine();
+  // ────────────────────────────────────────────────────────────────────────
 
   const results = {
     success: [],
@@ -177,9 +205,15 @@ async function autoApply104Jobs(page, options = {}) {
     totalProcessed: 0
   };
 
+  // Helper: extract job ID from 104 URL (e.g. /job/6dx3a → "6dx3a")
+  function extractJobId(url) {
+    return url.match(/\/job\/([a-zA-Z0-9]+)/)?.[1] ?? 'unknown';
+  }
+
   async function applyToJob(job) {
     console.log(`\n🔍 Processing: ${job.title}`);
 
+    let result;
     try {
       // Navigate to job detail page
       await page.goto(job.url, { waitUntil: 'networkidle', timeout: 30000 });
@@ -189,117 +223,125 @@ async function autoApply104Jobs(page, options = {}) {
       const pageText = await page.evaluate(() => document.body.textContent);
       if (pageText.includes('已應徵') || pageText.includes('今日已應徵')) {
         console.log('   ⚠️  SKIPPED: Already applied');
-        return { status: 'skipped', reason: 'Already applied', job };
-      }
-
-      // Find and click apply button
-      const applyClicked = await page.evaluate(() => {
-        const allElements = Array.from(document.querySelectorAll('button, a, div'));
-        const applyBtn = allElements.find(el => {
-          const text = el.textContent || '';
-          return (text.includes('我要應徵') || text.trim() === '應徵') &&
-                 !text.includes('已應徵') &&
-                 !text.includes('人應徵') &&
-                 el.offsetParent !== null;
-        });
-
-        if (applyBtn) {
-          applyBtn.click();
-          return true;
-        }
-        return false;
-      });
-
-      if (!applyClicked) {
-        console.log('   ⚠️  SKIPPED: No apply button found');
-        return { status: 'skipped', reason: 'No apply button', job };
-      }
-
-      await page.waitForTimeout(2000);
-
-      // Verify application form opened
-      const currentUrl = page.url();
-      if (!currentUrl.includes('apply=form')) {
-        console.log('   ⚠️  SKIPPED: Apply form not opened');
-        return { status: 'skipped', reason: 'Apply form not opened', job };
-      }
-
-      // Open cover letter dropdown
-      const dropdownOpened = await page.evaluate(() => {
-        const dropdowns = Array.from(document.querySelectorAll('div'));
-        const dropdown = dropdowns.find(el => {
-          const text = el.textContent || '';
-          return text.includes('系統預設') || text.includes('自訂推薦信');
-        });
-
-        if (dropdown) {
-          const clickableElement = dropdown.querySelector('.multiselect__select') ||
-                                   dropdown.querySelector('[class*="select"]') ||
-                                   dropdown;
-          clickableElement.click();
-          return true;
-        }
-        return false;
-      });
-
-      if (!dropdownOpened) {
-        console.log('   ⚠️  SKIPPED: Cover letter dropdown not found');
-        return { status: 'skipped', reason: 'Cover letter dropdown not found', job };
-      }
-
-      await page.waitForTimeout(1500);
-
-      // Select cover letter
-      const coverLetterName = coverLetter;
-      const optionSelected = await page.evaluate((letterName) => {
-        const options = Array.from(document.querySelectorAll('span, div, li'));
-        const option = options.find(el => el.textContent.trim() === letterName);
-        if (option) {
-          option.click();
-          return true;
-        }
-        return false;
-      }, coverLetterName);
-
-      if (!optionSelected) {
-        console.log(`   ⚠️  SKIPPED: Cover letter "${coverLetterName}" not found`);
-        return { status: 'skipped', reason: `Cover letter "${coverLetterName}" not found`, job };
-      }
-
-      await page.waitForTimeout(1000);
-
-      // Submit application
-      const submitted = await page.evaluate(() => {
-        const buttons = Array.from(document.querySelectorAll('button'));
-        const submitButton = buttons.find(el => el.textContent.includes('確認送出'));
-        if (submitButton) {
-          submitButton.click();
-          return true;
-        }
-        return false;
-      });
-
-      if (!submitted) {
-        console.log('   ⚠️  SKIPPED: Submit button not found');
-        return { status: 'skipped', reason: 'Submit button not found', job };
-      }
-
-      await page.waitForTimeout(3000);
-
-      // Verify success
-      const finalUrl = page.url();
-      if (finalUrl.includes('/job/apply/done/')) {
-        console.log('   ✅ SUCCESS: Application submitted');
-        return { status: 'success', job };
+        result = { status: 'skipped', reason: 'Already applied', job };
       } else {
-        console.log('   ❌ FAILED: Submit confirmation not received');
-        return { status: 'failed', reason: 'Submit confirmation not received', job };
-      }
 
+        // Find and click apply button
+        const applyClicked = await page.evaluate(() => {
+          const allElements = Array.from(document.querySelectorAll('button, a, div'));
+          const applyBtn = allElements.find(el => {
+            const text = el.textContent || '';
+            return (text.includes('我要應徵') || text.trim() === '應徵') &&
+                   !text.includes('已應徵') &&
+                   !text.includes('人應徵') &&
+                   el.offsetParent !== null;
+          });
+          if (applyBtn) { applyBtn.click(); return true; }
+          return false;
+        });
+
+        if (!applyClicked) {
+          console.log('   ⚠️  SKIPPED: No apply button found');
+          result = { status: 'skipped', reason: 'No apply button', job };
+        } else {
+          await page.waitForTimeout(2000);
+
+          // Verify application form opened
+          const currentUrl = page.url();
+          if (!currentUrl.includes('apply=form')) {
+            console.log('   ⚠️  SKIPPED: Apply form not opened');
+            result = { status: 'skipped', reason: 'Apply form not opened', job };
+          } else {
+
+            // Open cover letter dropdown
+            const dropdownOpened = await page.evaluate(() => {
+              const dropdowns = Array.from(document.querySelectorAll('div'));
+              const dropdown = dropdowns.find(el => {
+                const text = el.textContent || '';
+                return text.includes('系統預設') || text.includes('自訂推薦信');
+              });
+              if (dropdown) {
+                const clickable = dropdown.querySelector('.multiselect__select') ||
+                                  dropdown.querySelector('[class*="select"]') ||
+                                  dropdown;
+                clickable.click();
+                return true;
+              }
+              return false;
+            });
+
+            if (!dropdownOpened) {
+              console.log('   ⚠️  SKIPPED: Cover letter dropdown not found');
+              result = { status: 'skipped', reason: 'Cover letter dropdown not found', job };
+            } else {
+              await page.waitForTimeout(1500);
+
+              // Select cover letter
+              const optionSelected = await page.evaluate((letterName) => {
+                const option = Array.from(document.querySelectorAll('span, div, li'))
+                  .find(el => el.textContent.trim() === letterName);
+                if (option) { option.click(); return true; }
+                return false;
+              }, coverLetter);
+
+              if (!optionSelected) {
+                console.log(`   ⚠️  SKIPPED: Cover letter "${coverLetter}" not found`);
+                result = { status: 'skipped', reason: `Cover letter "${coverLetter}" not found`, job };
+              } else {
+                await page.waitForTimeout(1000);
+
+                // Submit application
+                const submitted = await page.evaluate(() => {
+                  const btn = Array.from(document.querySelectorAll('button'))
+                    .find(el => el.textContent.includes('確認送出'));
+                  if (btn) { btn.click(); return true; }
+                  return false;
+                });
+
+                if (!submitted) {
+                  console.log('   ⚠️  SKIPPED: Submit button not found');
+                  result = { status: 'skipped', reason: 'Submit button not found', job };
+                } else {
+                  await page.waitForTimeout(3000);
+
+                  // Verify success
+                  const finalUrl = page.url();
+                  if (finalUrl.includes('/job/apply/done/')) {
+                    console.log('   ✅ SUCCESS: Application submitted');
+                    result = { status: 'success', job };
+                  } else {
+                    console.log('   ❌ FAILED: Submit confirmation not received');
+                    result = { status: 'failed', reason: 'Submit confirmation not received', job };
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     } catch (error) {
       console.log(`   ❌ FAILED: ${error.message}`);
-      return { status: 'failed', reason: error.message, job };
+      result = { status: 'failed', reason: error.message, job };
     }
+
+    // ── Write job entry to log file ────────────────────────────────────────
+    const jobId = extractJobId(job.url);
+    const ts = new Date().toLocaleString();
+    const statusLabel = result.status.toUpperCase();
+    const reasonSuffix = result.reason ? ` (${result.reason})` : '';
+    logLine(`[${results.totalProcessed + 1}] ${statusLabel}${reasonSuffix}`);
+    logLine(`  Title    : ${job.title}`);
+    logLine(`  Company  : ${job.company  || '(unknown)'}`);
+    logLine(`  ID       : ${jobId}`);
+    logLine(`  URL      : ${job.url}`);
+    logLine(`  Salary   : ${job.salary   || '(not listed)'}`);
+    logLine(`  Location : ${job.location || '(not listed)'}`);
+    logLine(`  Tags     : ${job.tags?.join(', ') || '(none)'}`);
+    logLine(`  Time     : ${ts}`);
+    logLine();
+    // ────────────────────────────────────────────────────────────────────────
+
+    return result;
   }
 
   async function collectJobsFromPage(pageNum) {
@@ -310,10 +352,9 @@ async function autoApply104Jobs(page, options = {}) {
 
     const jobData = await page.evaluate(() => {
       const links = [];
-      const jobElements = document.querySelectorAll('a[href*="/job/"]');
       const seenUrls = new Set();
 
-      jobElements.forEach((linkElement) => {
+      document.querySelectorAll('a[href*="/job/"]').forEach((linkElement) => {
         const jobUrl = linkElement.href;
         if (seenUrls.has(jobUrl)) return;
         seenUrls.add(jobUrl);
@@ -326,13 +367,19 @@ async function autoApply104Jobs(page, options = {}) {
         const cantApply = containerText.includes('無法應徵') || containerText.includes('關閉職缺');
 
         if (jobUrl.includes('/job/') && !alreadyApplied && !cantApply) {
-          const companyElement = container?.querySelector('[class*="company"]');
-          const company = companyElement ? companyElement.textContent.trim() : '';
+          const company  = container?.querySelector('[class*="company"]')?.textContent.trim() ?? '';
+          const salary   = container?.querySelector('[class*="salary"]')?.textContent.trim() ?? '';
+          const location = container?.querySelector('[class*="location"], [class*="area"]')?.textContent.trim() ?? '';
+          const tagEls   = container?.querySelectorAll('[class*="tag"], [class*="label"]') ?? [];
+          const tags     = Array.from(tagEls).map(el => el.textContent.trim()).filter(Boolean);
 
           links.push({
-            url: jobUrl,
-            title: jobTitle.substring(0, 100),
-            company: company.substring(0, 50)
+            url:      jobUrl,
+            title:    jobTitle.substring(0, 100),
+            company:  company.substring(0, 50),
+            salary:   salary.substring(0, 50),
+            location: location.substring(0, 50),
+            tags:     tags.slice(0, 5)
           });
         }
       });
@@ -346,9 +393,10 @@ async function autoApply104Jobs(page, options = {}) {
   // Main automation loop
   console.log('\n' + '='.repeat(70));
   console.log('🚀 104.com.tw Auto-Apply Automation');
-  console.log(`   Start Page: ${startPage}`);
-  console.log(`   Max Pages: ${maxPages}`);
+  console.log(`   Start Page  : ${startPage}`);
+  console.log(`   Max Pages   : ${maxPages}`);
   console.log(`   Cover Letter: ${coverLetter}`);
+  console.log(`   Log File    : ${logFile}`);
   console.log('='.repeat(70) + '\n');
 
   let currentPage = startPage;
@@ -356,12 +404,14 @@ async function autoApply104Jobs(page, options = {}) {
 
   while (currentPage <= endPage) {
     console.log(`\n📄 [Page ${currentPage}]`);
+    logLine(`--- Page ${currentPage} ---`);
 
     const jobs = await collectJobsFromPage(currentPage);
     console.log(`   Found ${jobs.length} jobs to process`);
 
     if (jobs.length === 0) {
       console.log('   No more jobs found. Stopping automation.');
+      logLine('No more jobs found on this page. Stopping.');
       break;
     }
 
@@ -389,29 +439,60 @@ async function autoApply104Jobs(page, options = {}) {
     currentPage++;
   }
 
-  // Print final summary
+  // ── Write summary to log file ────────────────────────────────────────────
+  const runEnd = new Date();
+  const durationSec = ((runEnd - runStart) / 1000).toFixed(1);
+
+  logLine('='.repeat(70));
+  logLine('SUMMARY');
+  logLine('='.repeat(70));
+  logLine(`Completed       : ${runEnd.toLocaleString()}`);
+  logLine(`Duration        : ${durationSec}s`);
+  logLine(`Total Processed : ${results.totalProcessed}`);
+  logLine(`Success         : ${results.success.length}`);
+  logLine(`Skipped         : ${results.skipped.length}`);
+  logLine(`Failed          : ${results.failed.length}`);
+  logLine();
+
+  if (results.success.length > 0) {
+    logLine('-- Successfully Applied --');
+    results.success.forEach((job, i) => {
+      logLine(`  ${i + 1}. [${extractJobId(job.url)}] ${job.title} @ ${job.company}`);
+      logLine(`     ${job.url}`);
+    });
+    logLine();
+  }
+
+  if (results.failed.length > 0) {
+    logLine('-- Failed --');
+    results.failed.forEach(({ job, reason }, i) => {
+      logLine(`  ${i + 1}. [${extractJobId(job.url)}] ${job.title}`);
+      logLine(`     Reason : ${reason}`);
+      logLine(`     URL    : ${job.url}`);
+    });
+    logLine();
+  }
+
+  logLine('='.repeat(70));
+  // ────────────────────────────────────────────────────────────────────────
+
+  // Print final summary to console
   console.log('\n' + '='.repeat(70));
   console.log('📊 Final Summary');
   console.log('='.repeat(70));
-  console.log(`   Total Processed: ${results.totalProcessed}`);
+  console.log(`   Total Processed     : ${results.totalProcessed}`);
   console.log(`   ✅ Successfully Applied: ${results.success.length}`);
-  console.log(`   ⚠️  Skipped: ${results.skipped.length}`);
-  console.log(`   ❌ Failed: ${results.failed.length}`);
-  console.log('='.repeat(70) + '\n');
-
-  if (results.success.length > 0) {
-    console.log(`\n✅ Successfully Applied (${results.success.length}):`);
-    results.success.forEach((job, i) => {
-      console.log(`   ${i + 1}. ${job.title}`);
-      if (job.company) console.log(`      @ ${job.company}`);
-    });
-  }
+  console.log(`   ⚠️  Skipped           : ${results.skipped.length}`);
+  console.log(`   ❌ Failed            : ${results.failed.length}`);
+  console.log(`   ⏱️  Duration          : ${durationSec}s`);
+  console.log('='.repeat(70));
+  console.log(`\n📄 Full results saved to: ${logFile}\n`);
 
   return results;
 }
 
 // Usage
-await autoApply104Jobs(page, { startPage: 1, maxPages: 3 });
+await autoApply104Jobs(page, { startPage: 1, maxPages: 3, logDir: '.' });
 ```
 
 ## Configuration Options
@@ -423,6 +504,26 @@ await autoApply104Jobs(page, { startPage: 1, maxPages: 3 });
 | `delayMin` | number | 2000 | Minimum delay between applications (ms) |
 | `delayMax` | number | 4000 | Maximum delay between applications (ms) |
 | `coverLetter` | string | '自訂推薦信1' | Cover letter to use for applications |
+| `logDir` | string | `'.'` | Directory to save the result log file |
+
+### Log File
+
+Every run saves a timestamped file `YYYYMMDD_HHMMSS_result.txt` in `logDir`.
+Each entry contains:
+
+| Field | Description |
+|-------|-------------|
+| `Title` | Job title |
+| `Company` | Company name |
+| `ID` | Job ID extracted from the 104 URL |
+| `URL` | Full job URL |
+| `Salary` | Salary range (if listed on the search page) |
+| `Location` | Work location / area |
+| `Tags` | Job tags / labels |
+| `Time` | Timestamp of the application attempt |
+| `Result` | `SUCCESS`, `SKIPPED (reason)`, or `FAILED (reason)` |
+
+A summary block at the end lists duration, totals, and full URL lists for successes and failures.
 
 ## Safety Features
 
