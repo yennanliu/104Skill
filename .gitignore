@@ -1,0 +1,52 @@
+# Node modules (if running automation scripts directly)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Logs
+logs/
+*.log
+application_log.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Test results
+test-results/
+playwright-report/
+coverage/
+
+# Build output
+dist/
+build/
+out/
+
+# Secrets and credentials
+secrets.json
+credentials.json
+*.key
+*.pem
+
+# Personal data
+personal_data/
+my_applications.json
