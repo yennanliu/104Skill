@@ -21,13 +21,5 @@
     "automation",
     "claude-code"
   ],
-  "main": "SKILL.md",
-  "type": "skill",
-  "skills": [
-    {
-      "name": "104-job-auto-apply",
-      "file": "SKILL.md",
-      "description": "Automate job applications on 104.com.tw"
-    }
-  ]
+  "skills": "./skills"
 }
