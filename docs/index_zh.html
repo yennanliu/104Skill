@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Automate your job applications on 104.com.tw with Claude Code AI">
-    <title>104 Job Auto-Apply | Claude Code Skill</title>
+    <meta name="description" content="使用 Claude Code AI 自動化 104.com.tw 求職申請">
+    <title>104 自動應徵工具 | Claude Code 技能</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Hero Section -->
@@ -18,13 +18,13 @@
                 <div class="nav-content">
                     <div class="logo">
                         <span class="logo-icon">🤖</span>
-                        <span class="logo-text">104 Auto-Apply</span>
+                        <span class="logo-text">104 自動應徵</span>
                     </div>
                     <div class="nav-links">
-                        <a href="#features">Features</a>
-                        <a href="#how-it-works">How It Works</a>
-                        <a href="#docs">Docs</a>
-                        <a href="index_zh.html" class="language-switch">繁體中文</a>
+                        <a href="#features">功能特色</a>
+                        <a href="#how-it-works">使用方式</a>
+                        <a href="#docs">文件</a>
+                        <a href="index.html" class="language-switch">English</a>
                         <a href="https://github.com/yennanliu/104Skill" target="_blank" class="btn-secondary">
                             <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
                                 <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
@@ -39,24 +39,24 @@
         <div class="container">
             <div class="hero-content">
                 <div class="hero-badge">
-                    <span class="badge">Claude Code Skill</span>
+                    <span class="badge">Claude Code 技能</span>
                 </div>
                 <h1 class="hero-title">
-                    Automate Your Job Search on <span class="gradient-text">104.com.tw</span>
+                    自動化您在 <span class="gradient-text">104.com.tw</span> 的求職流程
                 </h1>
                 <p class="hero-subtitle">
-                    AI-powered job application automation for Taiwan's leading job platform.
-                    Apply to dozens of jobs in minutes with intelligent filtering and safety features.
+                    台灣求職平台的 AI 自動應徵工具。
+                    幾分鐘內投遞數十份工作，智慧過濾已投遞職缺，內建安全機制。
                 </p>
                 <div class="hero-buttons">
                     <a href="#install" class="btn-primary">
-                        Get Started
+                        立即開始
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M5 12h14M12 5l7 7-7 7"/>
                         </svg>
                     </a>
                     <a href="#demo" class="btn-outline">
-                        Watch Demo
+                        觀看示範
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polygon points="5 3 19 12 5 21 5 3"/>
                         </svg>
@@ -65,15 +65,15 @@
                 <div class="hero-stats">
                     <div class="stat">
                         <div class="stat-number">10x</div>
-                        <div class="stat-label">Faster Applications</div>
+                        <div class="stat-label">應徵速度</div>
                     </div>
                     <div class="stat">
-                        <div class="stat-number">Smart</div>
-                        <div class="stat-label">Auto-Skip Applied Jobs</div>
+                        <div class="stat-number">智慧</div>
+                        <div class="stat-label">自動跳過已投遞</div>
                     </div>
                     <div class="stat">
-                        <div class="stat-number">Safe</div>
-                        <div class="stat-label">Rate Limited</div>
+                        <div class="stat-number">安全</div>
+                        <div class="stat-label">頻率限制</div>
                     </div>
                 </div>
             </div>
@@ -90,45 +90,45 @@
     <section id="features" class="features">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Powerful Features</h2>
-                <p class="section-subtitle">Everything you need to streamline your job search</p>
+                <h2 class="section-title">強大功能</h2>
+                <p class="section-subtitle">完整的求職自動化解決方案</p>
             </div>
 
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">⚡</div>
-                    <h3>Lightning Fast</h3>
-                    <p>Apply to 20+ jobs in the time it takes to manually apply to one. Batch process multiple pages automatically.</p>
+                    <h3>極速應徵</h3>
+                    <p>手動應徵一份工作的時間，自動應徵 20 份以上。批次處理多頁職缺。</p>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon">🎯</div>
-                    <h3>Smart Filtering</h3>
-                    <p>Automatically skips jobs you've already applied to. No duplicate applications, no wasted time.</p>
+                    <h3>智慧過濾</h3>
+                    <p>自動跳過已投遞的職缺。不會重複應徵，節省時間。</p>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon">🛡️</div>
-                    <h3>Safe & Secure</h3>
-                    <p>Built-in rate limiting, random delays, and error handling. Respects 104.com.tw's terms of service.</p>
+                    <h3>安全可靠</h3>
+                    <p>內建頻率限制、隨機延遲和錯誤處理。遵守 104.com.tw 服務條款。</p>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon">🎨</div>
-                    <h3>Custom Cover Letters</h3>
-                    <p>Select different cover letters for different job types. Personalize your applications at scale.</p>
+                    <h3>自訂推薦信</h3>
+                    <p>針對不同職缺類型選擇不同推薦信。大規模個人化應徵。</p>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon">📊</div>
-                    <h3>Detailed Logging</h3>
-                    <p>Track success, failures, and skipped jobs. Know exactly what happened with each application.</p>
+                    <h3>詳細記錄</h3>
+                    <p>追蹤成功、失敗和跳過的應徵。清楚了解每筆應徵狀態。</p>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon">⚙️</div>
-                    <h3>Highly Configurable</h3>
-                    <p>Adjust delays, page limits, starting points. Full control over automation behavior.</p>
+                    <h3>高度可配置</h3>
+                    <p>調整延遲、頁數限制、起始點。完整控制自動化行為。</p>
                 </div>
             </div>
         </div>
@@ -138,16 +138,16 @@
     <section id="how-it-works" class="how-it-works">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">How It Works</h2>
-                <p class="section-subtitle">Get started in 3 simple steps</p>
+                <h2 class="section-title">使用方式</h2>
+                <p class="section-subtitle">三個簡單步驟即可開始</p>
             </div>
 
             <div class="steps">
                 <div class="step">
                     <div class="step-number">1</div>
                     <div class="step-content">
-                        <h3>Install the Skill</h3>
-                        <p>Run the installation script to add the skill to Claude Code</p>
+                        <h3>安裝技能</h3>
+                        <p>執行安裝腳本將技能加入 Claude Code</p>
                         <div class="code-block">
                             <code>./install.sh</code>
                         </div>
@@ -157,8 +157,8 @@
                 <div class="step">
                     <div class="step-number">2</div>
                     <div class="step-content">
-                        <h3>Configure Your Settings</h3>
-                        <p>Tell Claude your preferences: job type, pages to process, delays</p>
+                        <h3>配置設定</h3>
+                        <p>告訴 Claude 您的偏好：職缺類型、處理頁數、延遲時間</p>
                         <div class="code-block">
                             <code>/104-job-auto-apply</code>
                         </div>
@@ -168,10 +168,10 @@
                 <div class="step">
                     <div class="step-number">3</div>
                     <div class="step-content">
-                        <h3>Start Applying</h3>
-                        <p>Let Claude automate your applications while you focus on interview prep</p>
+                        <h3>開始應徵</h3>
+                        <p>讓 Claude 自動化您的應徵，專注準備面試</p>
                         <div class="code-block">
-                            <code>✅ 45 applications submitted!</code>
+                            <code>✅ 已投遞 45 份應徵！</code>
                         </div>
                     </div>
                 </div>
@@ -184,26 +184,26 @@
         <div class="container">
             <div class="install-content">
                 <div class="install-text">
-                    <h2>Ready to Get Started?</h2>
-                    <p>Install the skill in under 30 seconds and start automating your job search today.</p>
+                    <h2>準備開始了嗎？</h2>
+                    <p>30 秒內安裝技能，立即開始自動化求職。</p>
                     <div class="install-features">
                         <div class="install-feature">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="20 6 9 17 4 12"/>
                             </svg>
-                            <span>No signup required</span>
+                            <span>無需註冊</span>
                         </div>
                         <div class="install-feature">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="20 6 9 17 4 12"/>
                             </svg>
-                            <span>Free and open source</span>
+                            <span>免費開源</span>
                         </div>
                         <div class="install-feature">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="20 6 9 17 4 12"/>
                             </svg>
-                            <span>Works with Claude Code</span>
+                            <span>支援 Claude Code</span>
                         </div>
                     </div>
                 </div>
@@ -215,7 +215,7 @@
                                 <span class="terminal-button yellow"></span>
                                 <span class="terminal-button green"></span>
                             </div>
-                            <div class="terminal-title">Terminal</div>
+                            <div class="terminal-title">終端機</div>
                         </div>
                         <div class="terminal-body">
                             <div class="terminal-line">
@@ -231,7 +231,7 @@
                                 <span class="command">./install.sh</span>
                             </div>
                             <div class="terminal-line output">
-                                <span class="success">✅ Installation Complete!</span>
+                                <span class="success">✅ 安裝完成！</span>
                             </div>
                         </div>
                     </div>
@@ -244,37 +244,37 @@
     <section id="docs" class="docs">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Documentation</h2>
-                <p class="section-subtitle">Everything you need to know</p>
+                <h2 class="section-title">文件資源</h2>
+                <p class="section-subtitle">完整使用指南</p>
             </div>
 
             <div class="docs-grid">
                 <a href="https://github.com/yennanliu/104Skill/blob/main/QUICKSTART.md" class="doc-card" target="_blank">
                     <div class="doc-icon">🚀</div>
-                    <h3>Quick Start</h3>
-                    <p>Get up and running in 5 minutes</p>
-                    <span class="doc-link">Read Guide →</span>
+                    <h3>快速開始</h3>
+                    <p>5 分鐘內上手</p>
+                    <span class="doc-link">閱讀指南 →</span>
                 </a>
 
                 <a href="https://github.com/yennanliu/104Skill/blob/main/SKILL.md" class="doc-card" target="_blank">
                     <div class="doc-icon">📚</div>
-                    <h3>Full Documentation</h3>
-                    <p>Complete technical reference</p>
-                    <span class="doc-link">Read Docs →</span>
+                    <h3>完整文件</h3>
+                    <p>詳細技術參考</p>
+                    <span class="doc-link">閱讀文件 →</span>
                 </a>
 
                 <a href="https://github.com/yennanliu/104Skill/blob/main/USAGE_EXAMPLES.md" class="doc-card" target="_blank">
                     <div class="doc-icon">💡</div>
-                    <h3>Usage Examples</h3>
-                    <p>Practical scenarios and workflows</p>
-                    <span class="doc-link">View Examples →</span>
+                    <h3>使用範例</h3>
+                    <p>實際情境與工作流程</p>
+                    <span class="doc-link">查看範例 →</span>
                 </a>
 
                 <a href="https://github.com/yennanliu/104Skill/blob/main/CHANGELOG.md" class="doc-card" target="_blank">
                     <div class="doc-icon">📝</div>
-                    <h3>Changelog</h3>
-                    <p>Version history and updates</p>
-                    <span class="doc-link">View Changes →</span>
+                    <h3>更新日誌</h3>
+                    <p>版本歷史與更新</p>
+                    <span class="doc-link">查看變更 →</span>
                 </a>
             </div>
         </div>
@@ -284,38 +284,38 @@
     <section class="faq">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Frequently Asked Questions</h2>
+                <h2 class="section-title">常見問題</h2>
             </div>
 
             <div class="faq-list">
                 <details class="faq-item">
-                    <summary>Is this legal to use?</summary>
-                    <p>Yes! This tool is for personal productivity and educational purposes. Always use it responsibly and only apply to jobs you're genuinely interested in and qualified for.</p>
+                    <summary>這個工具合法嗎？</summary>
+                    <p>是的！此工具用於個人生產力和教育目的。請負責任地使用，只申請您真正感興趣且符合資格的職位。</p>
                 </details>
 
                 <details class="faq-item">
-                    <summary>How many jobs can I apply to?</summary>
-                    <p>We recommend applying to 10-20 jobs per session. Quality is more important than quantity. The skill includes safety features like rate limiting and delays.</p>
+                    <summary>我可以應徵多少份工作？</summary>
+                    <p>我們建議每次應徵 10-20 份工作。質量比數量更重要。此技能包含頻率限制和延遲等安全功能。</p>
                 </details>
 
                 <details class="faq-item">
-                    <summary>Will 104.com.tw detect this?</summary>
-                    <p>The skill uses random delays (2-4 seconds by default) and respects rate limits. It mimics human behavior to avoid detection. However, always use responsibly.</p>
+                    <summary>104.com.tw 會偵測到嗎？</summary>
+                    <p>此技能使用隨機延遲（預設 2-4 秒）並遵守頻率限制。模擬人類行為以避免偵測。但請務必負責任地使用。</p>
                 </details>
 
                 <details class="faq-item">
-                    <summary>Can I customize the cover letter?</summary>
-                    <p>Yes! You can specify different cover letters for different job types. Just configure the coverLetter option when running the skill.</p>
+                    <summary>可以自訂推薦信嗎？</summary>
+                    <p>可以！您可以針對不同職位類型指定不同的推薦信。只需在執行技能時配置 coverLetter 選項即可。</p>
                 </details>
 
                 <details class="faq-item">
-                    <summary>What if something goes wrong?</summary>
-                    <p>The skill has built-in error handling. If a job application fails, it logs the error and continues with the next job. You can review the logs to see what happened.</p>
+                    <summary>如果出錯怎麼辦？</summary>
+                    <p>此技能內建錯誤處理。如果某個職位應徵失敗，會記錄錯誤並繼續處理下一個職位。您可以查看日誌了解發生的情況。</p>
                 </details>
 
                 <details class="faq-item">
-                    <summary>Do I need to stay logged in?</summary>
-                    <p>Yes, you need to be logged in to 104.com.tw before running the automation. Keep your browser open during the process.</p>
+                    <summary>需要保持登入狀態嗎？</summary>
+                    <p>是的，執行自動化前需要登入 104.com.tw。處理過程中請保持瀏覽器開啟。</p>
                 </details>
             </div>
         </div>
@@ -325,17 +325,17 @@
     <section class="cta">
         <div class="container">
             <div class="cta-content">
-                <h2>Ready to Accelerate Your Job Search?</h2>
-                <p>Join developers who are landing more interviews by applying smarter, not harder.</p>
+                <h2>準備加速您的求職進度了嗎？</h2>
+                <p>加入使用更智慧方式求職、獲得更多面試機會的開發者行列。</p>
                 <div class="cta-buttons">
                     <a href="https://github.com/yennanliu/104Skill" class="btn-primary">
-                        Get Started Free
+                        免費開始使用
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M5 12h14M12 5l7 7-7 7"/>
                         </svg>
                     </a>
                     <a href="https://github.com/yennanliu/104Skill/blob/main/QUICKSTART.md" class="btn-outline-light">
-                        Read Docs
+                        閱讀文件
                     </a>
                 </div>
             </div>
@@ -349,30 +349,30 @@
                 <div class="footer-left">
                     <div class="footer-logo">
                         <span class="logo-icon">🤖</span>
-                        <span class="logo-text">104 Auto-Apply</span>
+                        <span class="logo-text">104 自動應徵</span>
                     </div>
                     <p class="footer-description">
-                        AI-powered job application automation for 104.com.tw
+                        104.com.tw 的 AI 自動應徵工具
                     </p>
                 </div>
                 <div class="footer-links">
                     <div class="footer-column">
-                        <h4>Documentation</h4>
-                        <a href="https://github.com/yennanliu/104Skill/blob/main/QUICKSTART.md">Quick Start</a>
-                        <a href="https://github.com/yennanliu/104Skill/blob/main/SKILL.md">Full Docs</a>
-                        <a href="https://github.com/yennanliu/104Skill/blob/main/USAGE_EXAMPLES.md">Examples</a>
+                        <h4>文件</h4>
+                        <a href="https://github.com/yennanliu/104Skill/blob/main/QUICKSTART.md">快速開始</a>
+                        <a href="https://github.com/yennanliu/104Skill/blob/main/SKILL.md">完整文件</a>
+                        <a href="https://github.com/yennanliu/104Skill/blob/main/USAGE_EXAMPLES.md">範例</a>
                     </div>
                     <div class="footer-column">
-                        <h4>Resources</h4>
+                        <h4>資源</h4>
                         <a href="https://github.com/yennanliu/104Skill">GitHub</a>
-                        <a href="https://github.com/yennanliu/104Skill/issues">Report Issue</a>
-                        <a href="https://github.com/yennanliu/104Skill/blob/main/CHANGELOG.md">Changelog</a>
+                        <a href="https://github.com/yennanliu/104Skill/issues">回報問題</a>
+                        <a href="https://github.com/yennanliu/104Skill/blob/main/CHANGELOG.md">更新日誌</a>
                     </div>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 104 Auto-Apply. Open source under MIT License.</p>
-                <p>Made with ❤️ for job seekers in Taiwan</p>
+                <p>&copy; 2026 104 自動應徵。MIT 授權開源。</p>
+                <p>為台灣求職者用 ❤️ 打造</p>
             </div>
         </div>
     </footer>

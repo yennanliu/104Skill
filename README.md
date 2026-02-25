@@ -7,6 +7,8 @@ A Claude Code skill for automating job applications on 104.com.tw using Playwrig
 
 🌐 **[Visit Website](https://yennanliu.github.io/104Skill/)** | 📚 **[Documentation](https://github.com/yennanliu/104Skill/blob/main/SKILL.md)** | 🚀 **[Quick Start](https://github.com/yennanliu/104Skill/blob/main/QUICKSTART.md)**
 
+![104 Auto-Apply Website](https://raw.githubusercontent.com/yennanliu/104Skill/main/docs/screenshot.png)
+
 ## Overview
 
 This skill enables automated job applications on Taiwan's 104.com.tw job platform. It supports:
@@ -28,7 +30,7 @@ This skill enables automated job applications on Taiwan's 104.com.tw job platfor
 # Project Skills
 
 Load the 104 job automation skill:
-@skill /Users/jerryliu/104Skill/SKILL.md
+@skill /path/to/104Skill/SKILL.md
 ```
 
 ### Option 2: Global Skill
@@ -178,10 +180,7 @@ This tool is for **educational and personal productivity purposes only**.
 
 ### Reference Implementation
 
-Original automation scripts are located in:
-- `/Users/jerryliu/ai_experiment/104/104_auto_apply_complete.js`
-- `/Users/jerryliu/ai_experiment/104/104_auto_apply_with_controls.js`
-- `/Users/jerryliu/ai_experiment/104/apply_single_job.js`
+See the `SKILL.md` file for complete implementation details and code examples.
 
 ## Contributing
 

@@ -6,7 +6,7 @@ Get started with the 104 job automation skill in under 5 minutes.
 
 ### Option A: Automatic Install (Recommended)
 ```bash
-cd /Users/jerryliu/104Skill
+cd 104Skill
 ./install.sh
 ```
 
@@ -136,7 +136,7 @@ ls ~/.claude/skills/104-job-auto-apply/
 # Should show: SKILL.md
 
 # If empty, run install script again
-cd /Users/jerryliu/104Skill
+cd 104Skill
 ./install.sh
 ```
 
@@ -246,7 +246,7 @@ Apply to jobs in Taichung, process 2 pages
 
 Run this command to begin:
 ```bash
-cd /Users/jerryliu/104Skill
+cd 104Skill
 ./install.sh
 ```
 

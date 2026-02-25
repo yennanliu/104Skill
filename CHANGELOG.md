@@ -39,7 +39,7 @@ All notable changes to the 104 Job Auto-Apply skill will be documented in this f
 - Cannot handle jobs requiring additional information
 
 ### References
-- Based on automation scripts from `/Users/jerryliu/ai_experiment/104/`
+- Based on Playwright browser automation implementation
 - Implements Playwright MCP browser automation
 - Designed for 104.com.tw job platform
 

@@ -18,9 +18,9 @@ Use this skill when:
 ## Prerequisites
 
 Before using this skill, ensure:
-- User is logged in to 104.com.tw (account: f339339@hotmail.com)
-- Resume is uploaded ("中英履歷_YENNANLIU")
-- Cover letter is created ("自訂推薦信1")
+- User is logged in to their 104.com.tw account
+- Resume is uploaded to 104.com.tw
+- At least one cover letter is created (note the exact name for configuration)
 - Playwright MCP tools are available
 - Stable internet connection
 

@@ -24,9 +24,6 @@ The skill will now be available globally in Claude Code as `/104-job-auto-apply`
 ```
 I want to test the 104 job automation skill.
 Can you help me apply to one software engineering job as a test?
-
-My 104.com.tw account is: f339339@hotmail.com
-My cover letter name is: 自訂推薦信1
 ```
 
 **What Claude will do:**
