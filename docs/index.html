@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Automate your job applications on 104.com.tw with Claude Code AI">
+    <title>104 Job Auto-Apply | Claude Code Skill</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Hero Section -->
+    <header class="hero">
+        <nav class="nav">
+            <div class="container">
+                <div class="nav-content">
+                    <div class="logo">
+                        <span class="logo-icon">🤖</span>
+                        <span class="logo-text">104 Auto-Apply</span>
+                    </div>
+                    <div class="nav-links">
+                        <a href="#features">Features</a>
+                        <a href="#how-it-works">How It Works</a>
+                        <a href="#docs">Docs</a>
+                        <a href="https://github.com/yennanliu/104Skill" target="_blank" class="btn-secondary">
+                            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                            </svg>
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge">Claude Code Skill</span>
+                </div>
+                <h1 class="hero-title">
+                    Automate Your Job Search on <span class="gradient-text">104.com.tw</span>
+                </h1>
+                <p class="hero-subtitle">
+                    AI-powered job application automation for Taiwan's leading job platform.
+                    Apply to dozens of jobs in minutes with intelligent filtering and safety features.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#install" class="btn-primary">
+                        Get Started
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                    <a href="#demo" class="btn-outline">
+                        Watch Demo
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <div class="stat-number">10x</div>
+                        <div class="stat-label">Faster Applications</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">Smart</div>
+                        <div class="stat-label">Auto-Skip Applied Jobs</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">Safe</div>
+                        <div class="stat-label">Rate Limited</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-background">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+            <div class="gradient-orb orb-3"></div>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Powerful Features</h2>
+                <p class="section-subtitle">Everything you need to streamline your job search</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Lightning Fast</h3>
+                    <p>Apply to 20+ jobs in the time it takes to manually apply to one. Batch process multiple pages automatically.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Smart Filtering</h3>
+                    <p>Automatically skips jobs you've already applied to. No duplicate applications, no wasted time.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Safe & Secure</h3>
+                    <p>Built-in rate limiting, random delays, and error handling. Respects 104.com.tw's terms of service.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Custom Cover Letters</h3>
+                    <p>Select different cover letters for different job types. Personalize your applications at scale.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Detailed Logging</h3>
+                    <p>Track success, failures, and skipped jobs. Know exactly what happened with each application.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">⚙️</div>
+                    <h3>Highly Configurable</h3>
+                    <p>Adjust delays, page limits, starting points. Full control over automation behavior.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-subtitle">Get started in 3 simple steps</p>
+            </div>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Install the Skill</h3>
+                        <p>Run the installation script to add the skill to Claude Code</p>
+                        <div class="code-block">
+                            <code>./install.sh</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Configure Your Settings</h3>
+                        <p>Tell Claude your preferences: job type, pages to process, delays</p>
+                        <div class="code-block">
+                            <code>/104-job-auto-apply</code>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Start Applying</h3>
+                        <p>Let Claude automate your applications while you focus on interview prep</p>
+                        <div class="code-block">
+                            <code>✅ 45 applications submitted!</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation Section -->
+    <section id="install" class="install">
+        <div class="container">
+            <div class="install-content">
+                <div class="install-text">
+                    <h2>Ready to Get Started?</h2>
+                    <p>Install the skill in under 30 seconds and start automating your job search today.</p>
+                    <div class="install-features">
+                        <div class="install-feature">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>No signup required</span>
+                        </div>
+                        <div class="install-feature">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Free and open source</span>
+                        </div>
+                        <div class="install-feature">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Works with Claude Code</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="install-code">
+                    <div class="terminal">
+                        <div class="terminal-header">
+                            <div class="terminal-buttons">
+                                <span class="terminal-button red"></span>
+                                <span class="terminal-button yellow"></span>
+                                <span class="terminal-button green"></span>
+                            </div>
+                            <div class="terminal-title">Terminal</div>
+                        </div>
+                        <div class="terminal-body">
+                            <div class="terminal-line">
+                                <span class="prompt">$</span>
+                                <span class="command">git clone https://github.com/yennanliu/104Skill.git</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="prompt">$</span>
+                                <span class="command">cd 104Skill</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="prompt">$</span>
+                                <span class="command">./install.sh</span>
+                            </div>
+                            <div class="terminal-line output">
+                                <span class="success">✅ Installation Complete!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Documentation Section -->
+    <section id="docs" class="docs">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Documentation</h2>
+                <p class="section-subtitle">Everything you need to know</p>
+            </div>
+
+            <div class="docs-grid">
+                <a href="https://github.com/yennanliu/104Skill/blob/main/QUICKSTART.md" class="doc-card" target="_blank">
+                    <div class="doc-icon">🚀</div>
+                    <h3>Quick Start</h3>
+                    <p>Get up and running in 5 minutes</p>
+                    <span class="doc-link">Read Guide →</span>
+                </a>
+
+                <a href="https://github.com/yennanliu/104Skill/blob/main/SKILL.md" class="doc-card" target="_blank">
+                    <div class="doc-icon">📚</div>
+                    <h3>Full Documentation</h3>
+                    <p>Complete technical reference</p>
+                    <span class="doc-link">Read Docs →</span>
+                </a>
+
+                <a href="https://github.com/yennanliu/104Skill/blob/main/USAGE_EXAMPLES.md" class="doc-card" target="_blank">
+                    <div class="doc-icon">💡</div>
+                    <h3>Usage Examples</h3>
+                    <p>Practical scenarios and workflows</p>
+                    <span class="doc-link">View Examples →</span>
+                </a>
+
+                <a href="https://github.com/yennanliu/104Skill/blob/main/CHANGELOG.md" class="doc-card" target="_blank">
+                    <div class="doc-icon">📝</div>
+                    <h3>Changelog</h3>
+                    <p>Version history and updates</p>
+                    <span class="doc-link">View Changes →</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Frequently Asked Questions</h2>
+            </div>
+
+            <div class="faq-list">
+                <details class="faq-item">
+                    <summary>Is this legal to use?</summary>
+                    <p>Yes! This tool is for personal productivity and educational purposes. Always use it responsibly and only apply to jobs you're genuinely interested in and qualified for.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>How many jobs can I apply to?</summary>
+                    <p>We recommend applying to 10-20 jobs per session. Quality is more important than quantity. The skill includes safety features like rate limiting and delays.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>Will 104.com.tw detect this?</summary>
+                    <p>The skill uses random delays (2-4 seconds by default) and respects rate limits. It mimics human behavior to avoid detection. However, always use responsibly.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>Can I customize the cover letter?</summary>
+                    <p>Yes! You can specify different cover letters for different job types. Just configure the coverLetter option when running the skill.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>What if something goes wrong?</summary>
+                    <p>The skill has built-in error handling. If a job application fails, it logs the error and continues with the next job. You can review the logs to see what happened.</p>
+                </details>
+
+                <details class="faq-item">
+                    <summary>Do I need to stay logged in?</summary>
+                    <p>Yes, you need to be logged in to 104.com.tw before running the automation. Keep your browser open during the process.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Accelerate Your Job Search?</h2>
+                <p>Join developers who are landing more interviews by applying smarter, not harder.</p>
+                <div class="cta-buttons">
+                    <a href="https://github.com/yennanliu/104Skill" class="btn-primary">
+                        Get Started Free
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                    <a href="https://github.com/yennanliu/104Skill/blob/main/QUICKSTART.md" class="btn-outline-light">
+                        Read Docs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <div class="footer-logo">
+                        <span class="logo-icon">🤖</span>
+                        <span class="logo-text">104 Auto-Apply</span>
+                    </div>
+                    <p class="footer-description">
+                        AI-powered job application automation for 104.com.tw
+                    </p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Documentation</h4>
+                        <a href="https://github.com/yennanliu/104Skill/blob/main/QUICKSTART.md">Quick Start</a>
+                        <a href="https://github.com/yennanliu/104Skill/blob/main/SKILL.md">Full Docs</a>
+                        <a href="https://github.com/yennanliu/104Skill/blob/main/USAGE_EXAMPLES.md">Examples</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Resources</h4>
+                        <a href="https://github.com/yennanliu/104Skill">GitHub</a>
+                        <a href="https://github.com/yennanliu/104Skill/issues">Report Issue</a>
+                        <a href="https://github.com/yennanliu/104Skill/blob/main/CHANGELOG.md">Changelog</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 104 Auto-Apply. Open source under MIT License.</p>
+                <p>Made with ❤️ for job seekers in Taiwan</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

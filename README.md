@@ -2,6 +2,11 @@
 
 A Claude Code skill for automating job applications on 104.com.tw using Playwright MCP tools.
 
+[![GitHub Pages](https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge)](https://yennanliu.github.io/104Skill/)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github)](https://github.com/yennanliu/104Skill)
+
+🌐 **[Visit Website](https://yennanliu.github.io/104Skill/)** | 📚 **[Documentation](https://github.com/yennanliu/104Skill/blob/main/SKILL.md)** | 🚀 **[Quick Start](https://github.com/yennanliu/104Skill/blob/main/QUICKSTART.md)**
+
 ## Overview
 
 This skill enables automated job applications on Taiwan's 104.com.tw job platform. It supports:
