@@ -1,8 +1,11 @@
 {
   "name": "104-job-auto-apply",
   "version": "1.0.0",
-  "description": "Automate job applications on 104.com.tw using Playwright MCP tools. Supports single job applications, batch processing, and multi-page automation with controls.",
-  "author": "yennanliu",
+  "description": "Automate job applications on 104.com.tw using Playwright MCP tools. Supports single job applications, batch processing, and multi-page automation.",
+  "owner": {
+    "name": "yennanliu",
+    "url": "https://github.com/yennanliu"
+  },
   "repository": "https://github.com/yennanliu/104Skill",
   "homepage": "https://yennanliu.github.io/104Skill/",
   "plugins": [
@@ -10,14 +13,9 @@
       "name": "104-job-auto-apply",
       "description": "Automate job applications on 104.com.tw",
       "version": "1.0.0",
-      "main": "SKILL.md",
-      "type": "skill",
-      "tags": ["job-automation", "104", "taiwan", "playwright", "job-search"],
+      "source": "SKILL.md",
       "commands": [
-        {
-          "name": "104-job-auto-apply",
-          "description": "Automate job applications on 104.com.tw"
-        }
+        "/104-job-auto-apply"
       ]
     }
   ]
