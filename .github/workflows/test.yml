@@ -136,61 +136,110 @@ jobs:
           echo "Skill verification passed."
 
   # ─────────────────────────────────────────────
-  # Job 4: Create GitHub Release (marketplace deploy)
-  #   Runs only on push to main after all tests pass.
-  #   The GitHub Release IS the marketplace artifact —
-  #   users install via: /plugin marketplace add yennanliu/104Skill
+  # Job 4: Auto-update & deploy to Claude Marketplace
+  #
+  #   On every passing push to main this job will:
+  #     1. Guard against re-running on its own version-bump commit
+  #     2. Bump the patch version in plugin.json + marketplace.json
+  #     3. Commit & push the bump with [skip ci] (no infinite loop)
+  #     4. Create a new GitHub Release — the marketplace artifact that
+  #        powers: /plugin marketplace add yennanliu/104Skill
   # ─────────────────────────────────────────────
   deploy-marketplace:
-    name: Deploy to Marketplace (GitHub Release)
+    name: Auto-Update & Deploy to Claude Marketplace
     runs-on: ubuntu-latest
     needs: [test-install, test-plugin-workflow]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
       contents: write
     steps:
-      - name: Checkout
+      - name: Checkout (full history, push-capable token)
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-      - name: Read version from plugin.json
-        id: version
+      # ── Guard: skip if this commit is already the version bump ──────────
+      - name: Guard — skip version-bump commits
+        id: guard
         run: |
-          VERSION=$(jq -r '.version' .claude-plugin/plugin.json)
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Detected plugin version: $VERSION"
-
-      - name: Check if release already exists
-        id: check
-        run: |
-          if gh release view "v${{ steps.version.outputs.version }}" > /dev/null 2>&1; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
+          MSG=$(git log -1 --pretty=%s)
+          echo "Last commit: $MSG"
+          if echo "$MSG" | grep -qF '[skip ci]'; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Version-bump commit detected — skipping deploy."
           else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
-        env:
-          GH_TOKEN: ${{ github.token }}
 
-      - name: Create GitHub Release
-        if: steps.check.outputs.exists == 'false'
+      # ── Bump patch version (e.g. 1.0.3 → 1.0.4) ────────────────────────
+      - name: Bump patch version
+        id: bump
+        if: steps.guard.outputs.skip == 'false'
         run: |
-          gh release create "v${{ steps.version.outputs.version }}" \
-            --title "v${{ steps.version.outputs.version }}" \
-            --latest \
-            --notes "$(cat <<'NOTES'
-          ## Install via Claude Code
+          OLD=$(jq -r '.version' .claude-plugin/plugin.json)
+          MAJOR=$(echo "$OLD" | cut -d. -f1)
+          MINOR=$(echo "$OLD" | cut -d. -f2)
+          PATCH=$(echo "$OLD" | cut -d. -f3)
+          NEW="$MAJOR.$MINOR.$((PATCH + 1))"
 
-          ```
+          # Update plugin.json
+          jq --arg v "$NEW" '.version = $v' \
+            .claude-plugin/plugin.json > /tmp/plugin.json
+          mv /tmp/plugin.json .claude-plugin/plugin.json
+
+          # Update marketplace.json (top-level + plugins[0])
+          jq --arg v "$NEW" '.version = $v | .plugins[0].version = $v' \
+            .claude-plugin/marketplace.json > /tmp/marketplace.json
+          mv /tmp/marketplace.json .claude-plugin/marketplace.json
+
+          echo "old=$OLD"   >> "$GITHUB_OUTPUT"
+          echo "version=$NEW" >> "$GITHUB_OUTPUT"
+          echo "Bumped: $OLD → $NEW"
+
+      # ── Commit & push version bump (tagged [skip ci]) ───────────────────
+      - name: Commit & push version bump
+        if: steps.guard.outputs.skip == 'false'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .claude-plugin/plugin.json .claude-plugin/marketplace.json
+          git commit -m "chore: bump version to ${{ steps.bump.outputs.version }} [skip ci]"
+          git push origin main
+          echo "Version bump pushed."
+
+      # ── Create GitHub Release (= Claude Marketplace entry) ──────────────
+      - name: Create GitHub Release
+        if: steps.guard.outputs.skip == 'false'
+        run: |
+          # Point the release tag at the bump commit we just pushed
+          git pull origin main
+          TAG="v${{ steps.bump.outputs.version }}"
+          TARGET=$(git rev-parse HEAD)
+
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --target "$TARGET" \
+            --latest \
+            --notes "## What's new in $TAG
+
+          Auto-released after all CI tests passed on \`main\`.
+
+          ### Install / update via Claude Code
+          \`\`\`
           /plugin marketplace add yennanliu/104Skill
           /plugin install 104-job-auto-apply
           /104-job-auto-apply
-          ```
+          \`\`\`
 
-          See [CHANGELOG](https://github.com/yennanliu/104Skill/blob/main/CHANGELOG.md) for full release notes.
-          NOTES
-          )"
+          See [CHANGELOG](https://github.com/yennanliu/104Skill/blob/main/CHANGELOG.md) for full release notes."
+
+          echo ""
+          echo "========================================="
+          echo "Marketplace release published: $TAG"
+          echo "Users can install / update with:"
+          echo "  /plugin marketplace add yennanliu/104Skill"
+          echo "  /plugin install 104-job-auto-apply"
+          echo "========================================="
         env:
           GH_TOKEN: ${{ github.token }}
-
-      - name: Release already exists (skip)
-        if: steps.check.outputs.exists == 'true'
-        run: echo "Release v${{ steps.version.outputs.version }} already exists — skipping."
