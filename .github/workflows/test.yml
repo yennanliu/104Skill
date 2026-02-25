@@ -1,0 +1,136 @@
+name: Plugin CI/CD Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  # ─────────────────────────────────────────────
+  # Job 1: Validate plugin file structure & JSON
+  # ─────────────────────────────────────────────
+  validate:
+    name: Validate Plugin Structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check required files exist
+        run: |
+          echo "=== Checking required files ==="
+          test -f SKILL.md                              && echo "OK  SKILL.md"
+          test -f install.sh                            && echo "OK  install.sh"
+          test -f .claude-plugin/plugin.json            && echo "OK  .claude-plugin/plugin.json"
+          test -f .claude-plugin/marketplace.json       && echo "OK  .claude-plugin/marketplace.json"
+          test -f skills/104-job-auto-apply/SKILL.md    && echo "OK  skills/104-job-auto-apply/SKILL.md"
+          echo "All required files present."
+
+      - name: Validate JSON — plugin.json
+        run: |
+          echo "=== Validating .claude-plugin/plugin.json ==="
+          jq . .claude-plugin/plugin.json
+
+      - name: Validate JSON — marketplace.json
+        run: |
+          echo "=== Validating .claude-plugin/marketplace.json ==="
+          jq . .claude-plugin/marketplace.json
+
+  # ─────────────────────────────────────────────
+  # Job 2: Install Playwright MCP globally & run install.sh
+  # ─────────────────────────────────────────────
+  test-install:
+    name: Test install.sh (with Playwright MCP auto-install)
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run install.sh (auto-installs Playwright MCP if missing)
+        run: |
+          chmod +x install.sh
+          ./install.sh
+
+      - name: Verify Playwright MCP is installed globally
+        run: |
+          echo "=== Playwright MCP global install check ==="
+          npm list -g @playwright/mcp --depth=0
+
+      - name: Verify skill was installed
+        run: |
+          echo "=== Checking skill installation ==="
+          test -f ~/.claude/skills/104-job-auto-apply/SKILL.md
+          echo "Skill installed at: ~/.claude/skills/104-job-auto-apply/"
+          ls -la ~/.claude/skills/104-job-auto-apply/
+
+  # ─────────────────────────────────────────────
+  # Job 3: Simulate full plugin command workflow
+  #   /plugin marketplace add yennanliu/104Skill
+  #   /plugin install 104-job-auto-apply
+  #   /plugin list
+  #   /104-job-auto-apply  (verify skill file is accessible)
+  # ─────────────────────────────────────────────
+  test-plugin-workflow:
+    name: Test Plugin Command Workflow
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Simulate: /plugin marketplace add yennanliu/104Skill
+      - name: "Simulate: /plugin marketplace add yennanliu/104Skill"
+        run: |
+          echo "=== /plugin marketplace add yennanliu/104Skill ==="
+          mkdir -p ~/.claude/marketplaces
+          cp .claude-plugin/marketplace.json ~/.claude/marketplaces/yennanliu-104Skill.json
+          echo "Marketplace registered:"
+          jq '.name, .version' ~/.claude/marketplaces/yennanliu-104Skill.json
+
+      # Simulate: /plugin install 104-job-auto-apply
+      - name: "Simulate: /plugin install 104-job-auto-apply"
+        run: |
+          echo "=== /plugin install 104-job-auto-apply ==="
+          mkdir -p ~/.claude/skills/104-job-auto-apply
+          cp skills/104-job-auto-apply/SKILL.md ~/.claude/skills/104-job-auto-apply/
+          echo "Plugin installed."
+
+      # Simulate: /plugin list
+      - name: "Simulate: /plugin list"
+        run: |
+          echo "=== /plugin list ==="
+          echo "Installed plugins:"
+          ls -1 ~/.claude/skills/
+          echo "---"
+          for d in ~/.claude/skills/*/; do
+            name=$(basename "$d")
+            echo "  - $name"
+          done
+
+      # Verify: /104-job-auto-apply — skill file must be readable
+      - name: "Verify: /104-job-auto-apply skill is accessible"
+        run: |
+          echo "=== /104-job-auto-apply (skill file check) ==="
+          SKILL_FILE="$HOME/.claude/skills/104-job-auto-apply/SKILL.md"
+          test -f "$SKILL_FILE"
+          echo "SKILL.md is present and readable."
+          echo ""
+          echo "--- First 30 lines of SKILL.md ---"
+          head -30 "$SKILL_FILE"
+          echo "---"
+          echo "Skill verification passed."

@@ -16,17 +16,46 @@ CURRENT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Check if SKILL.md exists in current directory
 if [ ! -f "$CURRENT_DIR/SKILL.md" ]; then
-    echo "❌ Error: SKILL.md not found in current directory"
+    echo "Error: SKILL.md not found in current directory"
     echo "Please run this script from the 104Skill directory"
     exit 1
 fi
 
-echo "📁 Current directory: $CURRENT_DIR"
-echo "📁 Target directory: $SKILLS_DIR"
+echo "Current directory: $CURRENT_DIR"
+echo "Target directory: $SKILLS_DIR"
+echo ""
+
+# -----------------------------------------------
+# Auto-install Playwright MCP (global) if missing
+# -----------------------------------------------
+echo "==========================================="
+echo "Checking Playwright MCP..."
+echo "==========================================="
+
+if ! command -v node &>/dev/null; then
+    echo "Warning: Node.js not found."
+    echo "  Playwright MCP requires Node.js. Install it from: https://nodejs.org"
+    echo "  Skipping Playwright MCP installation."
+elif ! command -v npm &>/dev/null; then
+    echo "Warning: npm not found. Skipping Playwright MCP installation."
+else
+    if npm list -g @playwright/mcp --depth=0 2>/dev/null | grep -q "@playwright/mcp"; then
+        echo "Playwright MCP is already installed globally."
+    else
+        echo "Playwright MCP not found. Installing globally..."
+        if npm install -g @playwright/mcp; then
+            echo "Playwright MCP installed successfully."
+        else
+            echo "Warning: Failed to install Playwright MCP automatically."
+            echo "  If you need sudo, run: sudo npm install -g @playwright/mcp"
+            echo "  Or configure an alternative MCP browser provider."
+        fi
+    fi
+fi
 echo ""
 
 # Create skills directory if it doesn't exist
-echo "📂 Creating skills directory..."
+echo "Creating skills directory..."
 mkdir -p "$SKILLS_DIR"
 
 # Copy SKILL.md to skills directory
