@@ -6,6 +6,8 @@ Complete installation guide for all methods of installing the 104 job automation
 
 The easiest way to install. Works directly in Claude Code CLI.
 
+**Prerequisites**: The repository must be pushed to GitHub with the `.claude-plugin/` directory.
+
 ### Step 1: Start Claude Code
 
 ```bash
@@ -19,6 +21,8 @@ claude
 ```
 
 This adds the GitHub repository to your Claude Code marketplace.
+
+**Note**: If you get an error about `marketplace.json` not found, ensure the latest version is pushed to GitHub.
 
 ### Step 3: Install the Skill
 
