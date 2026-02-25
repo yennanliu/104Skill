@@ -20,28 +20,61 @@ This skill enables automated job applications on Taiwan's 104.com.tw job platfor
 
 ## Installation
 
-### Option 1: Local Skill (Recommended for Development)
+### Option 1: Claude Code Marketplace (Recommended)
 
-1. Clone or place this repository in a directory
-2. In your project, create a `CLAUDE.md` file (if it doesn't exist)
-3. Add a reference to this skill:
+Install directly from GitHub marketplace in Claude Code:
 
+```bash
+claude
+
+# Add to marketplace
+/plugin marketplace add yennanliu/104Skill
+
+# Install the skill
+/plugin install 104-job-auto-apply
+
+# Verify installation
+/plugin list
+
+# Use the skill
+/104-job-auto-apply
+```
+
+### Option 2: Quick Install Script
+
+Run the installation script:
+
+```bash
+git clone https://github.com/yennanliu/104Skill.git
+cd 104Skill
+./install.sh
+```
+
+This copies the skill to `~/.claude/skills/104-job-auto-apply/`
+
+### Option 3: Local Development
+
+For local development and testing:
+
+```bash
+claude
+
+# Add local marketplace
+/plugin marketplace add /path/to/104Skill
+
+# Install from local source
+/plugin install 104-job-auto-apply@local
+
+# Or reference directly in project CLAUDE.md
+```
+
+In your project's `CLAUDE.md`:
 ```markdown
 # Project Skills
 
 Load the 104 job automation skill:
 @skill /path/to/104Skill/SKILL.md
 ```
-
-### Option 2: Global Skill
-
-1. Copy `SKILL.md` to your Claude Code skills directory:
-```bash
-mkdir -p ~/.claude/skills/104-job-auto-apply
-cp SKILL.md ~/.claude/skills/104-job-auto-apply/
-```
-
-2. The skill will be automatically available in all projects
 
 ## Prerequisites
 

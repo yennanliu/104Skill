@@ -24,6 +24,35 @@ Before using this skill, ensure:
 - Playwright MCP tools are available
 - Stable internet connection
 
+## Installation
+
+### Claude Code Marketplace (Recommended)
+
+```bash
+claude
+
+# Add to marketplace
+/plugin marketplace add yennanliu/104Skill
+
+# Install the skill
+/plugin install 104-job-auto-apply
+
+# Use the skill
+/104-job-auto-apply
+```
+
+### Local Development
+
+For testing local modifications:
+
+```bash
+# Add local marketplace
+/plugin marketplace add /path/to/104Skill
+
+# Install from local source
+/plugin install 104-job-auto-apply@local
+```
+
 ## Usage Modes
 
 ### Mode 1: Single Job Application (Manual Testing)

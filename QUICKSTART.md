@@ -4,16 +4,43 @@ Get started with the 104 job automation skill in under 5 minutes.
 
 ## 🚀 Installation (30 seconds)
 
-### Option A: Automatic Install (Recommended)
+### Option A: Claude Code Marketplace (Recommended)
+
+Install directly in Claude Code:
+
 ```bash
+claude
+
+# Add to marketplace
+/plugin marketplace add yennanliu/104Skill
+
+# Install the skill
+/plugin install 104-job-auto-apply
+
+# Verify installation
+/plugin list
+```
+
+### Option B: Quick Install Script
+
+```bash
+git clone https://github.com/yennanliu/104Skill.git
 cd 104Skill
 ./install.sh
 ```
 
-### Option B: Manual Install
+### Option C: Local Development
+
+For testing local changes:
+
 ```bash
-mkdir -p ~/.claude/skills/104-job-auto-apply
-cp SKILL.md ~/.claude/skills/104-job-auto-apply/
+claude
+
+# Add local marketplace
+/plugin marketplace add /path/to/104Skill
+
+# Install from local
+/plugin install 104-job-auto-apply@local
 ```
 
 ## ✅ Prerequisites Checklist
