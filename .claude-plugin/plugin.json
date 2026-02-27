@@ -1,6 +1,6 @@
 {
   "name": "104-job-auto-apply",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Automate job applications on 104.com.tw using Playwright MCP tools. Supports single job applications, batch processing, and multi-page automation with controls.",
   "author": {
     "name": "yennanliu",

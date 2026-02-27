@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "104-job-auto-apply-marketplace",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Automate job applications on 104.com.tw using Playwright MCP tools. Supports single job applications, batch processing, and multi-page automation.",
   "owner": {
     "name": "yennanliu",
@@ -11,7 +11,7 @@
     {
       "name": "104-job-auto-apply",
       "description": "Automate job applications on 104.com.tw",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "author": {
         "name": "yennanliu",
         "email": "yennanliu@github.com"
