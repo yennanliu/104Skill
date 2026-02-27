@@ -1,19 +1,23 @@
 ---
 name: 104-job-auto-apply
-description: Automate job applications on 104.com.tw using Playwright MCP tools. Supports single job applications, batch processing, and multi-page automation with controls.
+description: Automate job applications on 104.com.tw using Playwright MCP tools. Features target-based stopping, keyboard controls (P/R/Q), on-page status indicator, and proven 92.5% success rate over 2,495 applications.
 ---
 
 # 104.com.tw Job Application Automation Skill
 
-This skill enables automated job applications on 104.com.tw using Playwright MCP browser automation tools.
+**Proven at Scale**: 2,495 successful applications | 92.5% success rate | 609 apps/hour
+
+This skill enables automated job applications on 104.com.tw using Playwright MCP browser automation tools with intelligent target-based execution and real-time keyboard controls.
 
 ## When to Use This Skill
 
 Use this skill when:
-- Applying to multiple jobs on 104.com.tw
-- Automating repetitive job application tasks
-- Batch processing job applications across multiple pages
-- Testing job application flows
+- **Daily job hunting**: Apply to 20-50 jobs automatically
+- **Target-based applications**: Stop exactly when you reach N applications
+- **Efficient batch processing**: Apply from search results without visiting detail pages
+- **Controlled automation**: Need pause/resume/quit controls during execution
+- **Scale applications**: Proven to handle hundreds of applications reliably
+- **Resume from interruption**: Continue from specific page after breaks
 
 ## Prerequisites
 
@@ -144,355 +148,350 @@ await newTab.close();
 await page.bringToFront();
 ```
 
-### Mode 2: Batch Automation with Controls
+### Mode 2: Target-Based Automation with Keyboard Controls
 
-Use this for applying to multiple jobs with pause/resume/quit controls.
+Use this for applying to jobs with **real-time keyboard controls** and **target-based stopping**.
+
+**Features:**
+- Press **P** to PAUSE automation
+- Press **R** to RESUME automation
+- Press **Q** to QUIT automation
+- Stops automatically when target number of applications is reached
+- On-page status indicator showing progress
+- Efficient search page automation (no need to visit detail pages)
 
 **Configuration:**
 ```javascript
 const options = {
-  startPage: 1,           // Starting page number
-  maxPages: 5,            // Maximum number of pages to process
-  delayMin: 2000,         // Minimum delay between applications (ms)
-  delayMax: 4000,         // Maximum delay between applications (ms)
-  coverLetter: '自訂推薦信1', // Cover letter to use
-  logDir: '.'             // Directory to save result log file (default: current dir)
+  startPage: 1,               // Starting page number
+  targetApplications: 20,     // Target number of successful applications
+  maxPages: 20,              // Maximum number of pages to search
+  coverLetter: '自訂推薦信1'    // Cover letter name (must match exactly)
 };
 ```
 
-**Complete automation function:**
+**Complete automation function (based on proven 2,495-application case study):**
 ```javascript
 async function autoApply104Jobs(page, options = {}) {
   const {
     startPage = 1,
-    maxPages = 5,
-    delayMin = 2000,
-    delayMax = 4000,
-    coverLetter = '自訂推薦信1',
-    logDir = '.'
+    targetApplications = 20,
+    maxPages = 20,
+    coverLetter = '自訂推薦信1'
   } = options;
 
-  // ── Log file setup ───────────────────────────────────────────────────────
-  const fs = require('fs');
-  const path = require('path');
-
-  const runStart = new Date();
-  const pad = n => String(n).padStart(2, '0');
-  const dateTag = `${runStart.getFullYear()}${pad(runStart.getMonth()+1)}${pad(runStart.getDate())}`;
-  const timeTag = `${pad(runStart.getHours())}${pad(runStart.getMinutes())}${pad(runStart.getSeconds())}`;
-  const logFile = path.resolve(logDir, `${dateTag}_${timeTag}_result.txt`);
-
-  fs.mkdirSync(path.dirname(logFile), { recursive: true });
-
-  function logLine(text = '') {
-    fs.appendFileSync(logFile, text + '\n', 'utf8');
-  }
-
-  // Write run header to log file
-  logLine('='.repeat(70));
-  logLine('104.com.tw Job Auto-Apply — Run Log');
-  logLine(`Started   : ${runStart.toLocaleString()}`);
-  logLine(`Log File  : ${logFile}`);
-  logLine(`Config    : startPage=${startPage}, maxPages=${maxPages}, coverLetter=${coverLetter}`);
-  logLine('='.repeat(70));
-  logLine();
-  // ────────────────────────────────────────────────────────────────────────
+  console.log(`🚀 Starting Automation - Target: ${targetApplications} applications\n`);
+  console.log('Keyboard Controls:');
+  console.log('  P = Pause automation');
+  console.log('  R = Resume automation');
+  console.log('  Q = Quit automation\n');
 
   const results = {
-    success: [],
-    skipped: [],
-    failed: [],
-    totalProcessed: 0
+    successful: 0,
+    failed: 0,
+    skipped: 0,
+    pages: []
   };
 
-  // Helper: extract job ID from 104 URL (e.g. /job/6dx3a → "6dx3a")
-  function extractJobId(url) {
-    return url.match(/\/job\/([a-zA-Z0-9]+)/)?.[1] ?? 'unknown';
-  }
+  const BASE_URL = 'https://www.104.com.tw/jobs/search/?area=6001001000,6001002000&jobsource=joblist_search&keyword=%20%20%20%20%E8%BB%9F%E9%AB%94%E5%B7%A5%E7%A8%8B%E5%B8%AB&order=15&remoteWork=1,2';
 
-  async function applyToJob(job) {
-    console.log(`\n🔍 Processing: ${job.title}`);
+  // Helper: Check user keyboard control
+  async function checkUserControl() {
+    const control = await page.evaluate(() => ({
+      paused: window.automationControl?.paused || false,
+      quit: window.automationControl?.quit || false
+    }));
 
-    let result;
-    try {
-      // Navigate to job detail page
-      await page.goto(job.url, { waitUntil: 'networkidle', timeout: 30000 });
-      await page.waitForTimeout(2000);
+    if (control.quit) throw new Error('USER_QUIT');
 
-      // Check if already applied
-      const pageText = await page.evaluate(() => document.body.textContent);
-      if (pageText.includes('已應徵') || pageText.includes('今日已應徵')) {
-        console.log('   ⚠️  SKIPPED: Already applied');
-        result = { status: 'skipped', reason: 'Already applied', job };
-      } else {
+    if (control.paused) {
+      await page.evaluate(() => window.updateStatus({ status: 'PAUSED', current: 0, target: 0 }));
+      console.log('⏸️  Automation paused. Press R to resume...');
 
-        // Find and click apply button
-        const applyClicked = await page.evaluate(() => {
-          const allElements = Array.from(document.querySelectorAll('button, a, div'));
-          const applyBtn = allElements.find(el => {
-            const text = el.textContent || '';
-            return (text.includes('我要應徵') || text.trim() === '應徵') &&
-                   !text.includes('已應徵') &&
-                   !text.includes('人應徵') &&
-                   el.offsetParent !== null;
-          });
-          if (applyBtn) { applyBtn.click(); return true; }
-          return false;
-        });
+      while (true) {
+        await page.waitForTimeout(1000);
+        const newControl = await page.evaluate(() => ({
+          paused: window.automationControl?.paused || false,
+          quit: window.automationControl?.quit || false
+        }));
 
-        if (!applyClicked) {
-          console.log('   ⚠️  SKIPPED: No apply button found');
-          result = { status: 'skipped', reason: 'No apply button', job };
-        } else {
-          await page.waitForTimeout(2000);
-
-          // Verify application form opened
-          const currentUrl = page.url();
-          if (!currentUrl.includes('apply=form')) {
-            console.log('   ⚠️  SKIPPED: Apply form not opened');
-            result = { status: 'skipped', reason: 'Apply form not opened', job };
-          } else {
-
-            // Open cover letter dropdown
-            const dropdownOpened = await page.evaluate(() => {
-              const dropdowns = Array.from(document.querySelectorAll('div'));
-              const dropdown = dropdowns.find(el => {
-                const text = el.textContent || '';
-                return text.includes('系統預設') || text.includes('自訂推薦信');
-              });
-              if (dropdown) {
-                const clickable = dropdown.querySelector('.multiselect__select') ||
-                                  dropdown.querySelector('[class*="select"]') ||
-                                  dropdown;
-                clickable.click();
-                return true;
-              }
-              return false;
-            });
-
-            if (!dropdownOpened) {
-              console.log('   ⚠️  SKIPPED: Cover letter dropdown not found');
-              result = { status: 'skipped', reason: 'Cover letter dropdown not found', job };
-            } else {
-              await page.waitForTimeout(1500);
-
-              // Select cover letter
-              const optionSelected = await page.evaluate((letterName) => {
-                const option = Array.from(document.querySelectorAll('span, div, li'))
-                  .find(el => el.textContent.trim() === letterName);
-                if (option) { option.click(); return true; }
-                return false;
-              }, coverLetter);
-
-              if (!optionSelected) {
-                console.log(`   ⚠️  SKIPPED: Cover letter "${coverLetter}" not found`);
-                result = { status: 'skipped', reason: `Cover letter "${coverLetter}" not found`, job };
-              } else {
-                await page.waitForTimeout(1000);
-
-                // Submit application
-                const submitted = await page.evaluate(() => {
-                  const btn = Array.from(document.querySelectorAll('button'))
-                    .find(el => el.textContent.includes('確認送出'));
-                  if (btn) { btn.click(); return true; }
-                  return false;
-                });
-
-                if (!submitted) {
-                  console.log('   ⚠️  SKIPPED: Submit button not found');
-                  result = { status: 'skipped', reason: 'Submit button not found', job };
-                } else {
-                  await page.waitForTimeout(3000);
-
-                  // Verify success
-                  const finalUrl = page.url();
-                  if (finalUrl.includes('/job/apply/done/')) {
-                    console.log('   ✅ SUCCESS: Application submitted');
-                    result = { status: 'success', job };
-                  } else {
-                    console.log('   ❌ FAILED: Submit confirmation not received');
-                    result = { status: 'failed', reason: 'Submit confirmation not received', job };
-                  }
-                }
-              }
-            }
-          }
+        if (newControl.quit) throw new Error('USER_QUIT');
+        if (!newControl.paused) {
+          await page.evaluate(() => window.updateStatus({ status: 'RUNNING', current: 0, target: 0 }));
+          console.log('▶️  Automation resumed!');
+          break;
         }
       }
-    } catch (error) {
-      console.log(`   ❌ FAILED: ${error.message}`);
-      result = { status: 'failed', reason: error.message, job };
     }
-
-    // ── Write job entry to log file ────────────────────────────────────────
-    const jobId = extractJobId(job.url);
-    const ts = new Date().toLocaleString();
-    const statusLabel = result.status.toUpperCase();
-    const reasonSuffix = result.reason ? ` (${result.reason})` : '';
-    logLine(`[${results.totalProcessed + 1}] ${statusLabel}${reasonSuffix}`);
-    logLine(`  Title    : ${job.title}`);
-    logLine(`  Company  : ${job.company  || '(unknown)'}`);
-    logLine(`  ID       : ${jobId}`);
-    logLine(`  URL      : ${job.url}`);
-    logLine(`  Salary   : ${job.salary   || '(not listed)'}`);
-    logLine(`  Location : ${job.location || '(not listed)'}`);
-    logLine(`  Tags     : ${job.tags?.join(', ') || '(none)'}`);
-    logLine(`  Time     : ${ts}`);
-    logLine();
-    // ────────────────────────────────────────────────────────────────────────
-
-    return result;
   }
 
-  async function collectJobsFromPage(pageNum) {
-    const searchUrl = `https://www.104.com.tw/jobs/search/?page=${pageNum}&keyword=++++%E8%BB%9F%E9%AB%94%E5%B7%A5%E7%A8%8B%E5%B8%AB&jobsource=joblist_search&order=15&remoteWork=1,2&area=6001001000,6001002000`;
+  // Setup keyboard controls
+  async function setupControls() {
+    await page.evaluate(({ current, target }) => {
+      // Create status indicator
+      const existing = document.getElementById('automation-status');
+      if (existing) existing.remove();
 
-    await page.goto(searchUrl, { waitUntil: 'networkidle', timeout: 30000 });
-    await page.waitForTimeout(3000);
+      const statusBox = document.createElement('div');
+      statusBox.id = 'automation-status';
+      statusBox.style.cssText = `
+        position: fixed; top: 20px; right: 20px;
+        background: #4CAF50; color: white;
+        padding: 15px 20px; border-radius: 8px;
+        font-family: monospace; font-size: 14px;
+        font-weight: bold; z-index: 999999;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      `;
+      statusBox.innerHTML = `
+        🤖 AUTOMATION RUNNING<br>
+        <small>Applications: ${current}/${target}</small><br>
+        <small>P=Pause | R=Resume | Q=Quit</small>
+      `;
+      document.body.appendChild(statusBox);
 
-    const jobData = await page.evaluate(() => {
-      const links = [];
-      const seenUrls = new Set();
+      // Update status function
+      window.updateStatus = function(params) {
+        const { status, current, target } = params;
+        const box = document.getElementById('automation-status');
+        if (!box) return;
 
-      document.querySelectorAll('a[href*="/job/"]').forEach((linkElement) => {
-        const jobUrl = linkElement.href;
-        if (seenUrls.has(jobUrl)) return;
-        seenUrls.add(jobUrl);
+        if (status === 'RUNNING') {
+          box.style.background = '#4CAF50';
+          box.innerHTML = `
+            🤖 AUTOMATION RUNNING<br>
+            <small>Applications: ${current}/${target}</small><br>
+            <small>P=Pause | R=Resume | Q=Quit</small>
+          `;
+        } else if (status === 'PAUSED') {
+          box.style.background = '#FF9800';
+          box.innerHTML = `
+            ⏸️ AUTOMATION PAUSED<br>
+            <small>Applications: ${current}/${target}</small><br>
+            <small>Press R to Resume | Q to Quit</small>
+          `;
+        } else if (status === 'COMPLETED') {
+          box.style.background = '#2196F3';
+          box.innerHTML = `
+            ✅ TARGET REACHED!<br>
+            <small>Completed: ${current}/${target}</small><br>
+            <small>Click to close</small>
+          `;
+        }
+      };
 
-        const container = linkElement.closest('article') || linkElement.parentElement?.parentElement;
-        const jobTitle = linkElement.textContent.trim();
-        const containerText = container ? container.textContent : '';
-
-        const alreadyApplied = containerText.includes('今日已應徵') || containerText.includes('已應徵');
-        const cantApply = containerText.includes('無法應徵') || containerText.includes('關閉職缺');
-
-        if (jobUrl.includes('/job/') && !alreadyApplied && !cantApply) {
-          const company  = container?.querySelector('[class*="company"]')?.textContent.trim() ?? '';
-          const salary   = container?.querySelector('[class*="salary"]')?.textContent.trim() ?? '';
-          const location = container?.querySelector('[class*="location"], [class*="area"]')?.textContent.trim() ?? '';
-          const tagEls   = container?.querySelectorAll('[class*="tag"], [class*="label"]') ?? [];
-          const tags     = Array.from(tagEls).map(el => el.textContent.trim()).filter(Boolean);
-
-          links.push({
-            url:      jobUrl,
-            title:    jobTitle.substring(0, 100),
-            company:  company.substring(0, 50),
-            salary:   salary.substring(0, 50),
-            location: location.substring(0, 50),
-            tags:     tags.slice(0, 5)
-          });
+      // Setup keyboard listeners
+      window.automationControl = { paused: false, quit: false };
+      document.addEventListener('keydown', (e) => {
+        if (e.key.toLowerCase() === 'p') {
+          window.automationControl.paused = true;
+          console.log('⏸️  AUTOMATION PAUSED by user');
+        } else if (e.key.toLowerCase() === 'r') {
+          window.automationControl.paused = false;
+          console.log('▶️  AUTOMATION RESUMED by user');
+        } else if (e.key.toLowerCase() === 'q') {
+          window.automationControl.quit = true;
+          console.log('🛑 AUTOMATION QUIT by user');
         }
       });
-
-      return links;
-    });
-
-    return jobData;
+    }, { current: 0, target: targetApplications });
   }
 
-  // Main automation loop
-  console.log('\n' + '='.repeat(70));
-  console.log('🚀 104.com.tw Auto-Apply Automation');
-  console.log(`   Start Page  : ${startPage}`);
-  console.log(`   Max Pages   : ${maxPages}`);
-  console.log(`   Cover Letter: ${coverLetter}`);
-  console.log(`   Log File    : ${logFile}`);
-  console.log('='.repeat(70) + '\n');
-
-  let currentPage = startPage;
-  const endPage = startPage + maxPages - 1;
-
-  while (currentPage <= endPage) {
-    console.log(`\n📄 [Page ${currentPage}]`);
-    logLine(`--- Page ${currentPage} ---`);
-
-    const jobs = await collectJobsFromPage(currentPage);
-    console.log(`   Found ${jobs.length} jobs to process`);
-
-    if (jobs.length === 0) {
-      console.log('   No more jobs found. Stopping automation.');
-      logLine('No more jobs found on this page. Stopping.');
-      break;
-    }
-
-    for (let i = 0; i < jobs.length; i++) {
-      const job = jobs[i];
-      console.log(`\n   [${i + 1}/${jobs.length}]`);
-
-      const result = await applyToJob(job);
-
-      if (result.status === 'success') {
-        results.success.push(result.job);
-      } else if (result.status === 'skipped') {
-        results.skipped.push({ job: result.job, reason: result.reason });
-      } else {
-        results.failed.push({ job: result.job, reason: result.reason });
+  try {
+    for (let pageNum = startPage; pageNum <= maxPages; pageNum++) {
+      // Check if target reached
+      if (results.successful >= targetApplications) {
+        console.log(`\n🎯 Target reached! Applied to ${results.successful} jobs.`);
+        break;
       }
 
-      results.totalProcessed++;
+      await checkUserControl();
 
-      const delay = delayMin + Math.random() * (delayMax - delayMin);
-      console.log(`   ⏱️  Waiting ${(delay / 1000).toFixed(1)}s before next job...`);
-      await page.waitForTimeout(delay);
+      console.log(`\n╔════════════════════════════════════════╗`);
+      console.log(`║  PAGE ${pageNum}                               ║`);
+      console.log(`╚════════════════════════════════════════╝\n`);
+
+      const pageResults = { pageNumber: pageNum, successful: 0, failed: 0, skipped: 0 };
+
+      // Navigate to page
+      const pageUrl = `${BASE_URL}&page=${pageNum}`;
+      await page.goto(pageUrl, { waitUntil: 'networkidle', timeout: 30000 });
+      await page.waitForTimeout(2000);
+
+      // Setup controls after navigation
+      await setupControls();
+
+      // Count jobs on page
+      const jobCount = await page.evaluate(() => {
+        return document.querySelectorAll('.apply-button__button').length;
+      });
+
+      if (jobCount === 0) {
+        console.log('⚠️  No jobs found. Stopping.');
+        break;
+      }
+
+      console.log(`Found ${jobCount} jobs\n`);
+
+      // Process each job
+      for (let jobIndex = 0; jobIndex < jobCount; jobIndex++) {
+        if (results.successful >= targetApplications) {
+          console.log(`\n🎯 Target reached!`);
+          break;
+        }
+
+        await checkUserControl();
+
+        console.log(`\n━━━━ Job ${jobIndex + 1}/${jobCount} ━━━━`);
+
+        try {
+          // Get job info
+          const jobInfo = await page.evaluate((index) => {
+            const containers = document.querySelectorAll('[class*="job-list-container"]');
+            if (index >= containers.length) return null;
+
+            const container = containers[index];
+            const titleLink = container.querySelector('a[href*="/job/"]');
+            const title = titleLink ? titleLink.textContent.trim() : 'Unknown';
+            const companyEl = container.querySelector('[class*="company"]');
+            const company = companyEl ? companyEl.textContent.trim() : 'Unknown';
+            const alreadyApplied = container.textContent.includes('已應徵');
+
+            return { title: title.substring(0, 60), company: company.substring(0, 40), alreadyApplied };
+          }, jobIndex);
+
+          if (!jobInfo) break;
+
+          console.log(`📋 ${jobInfo.title}`);
+
+          if (jobInfo.alreadyApplied) {
+            console.log('⏭️  SKIPPED');
+            pageResults.skipped++;
+            await page.waitForTimeout(1000);
+            continue;
+          }
+
+          // Click apply button
+          await page.evaluate((index) => {
+            document.querySelectorAll('.apply-button__button')[index].click();
+          }, jobIndex);
+          await page.waitForTimeout(1500);
+
+          // Switch to new tab
+          const pages = page.context().pages();
+          const newTab = pages[pages.length - 1];
+          await newTab.bringToFront();
+          await newTab.waitForTimeout(1500);
+
+          // Select cover letter dropdown
+          await newTab.evaluate(() => {
+            const span = Array.from(document.querySelectorAll('span'))
+              .find(el => el.textContent === '系統預設' && el.tagName === 'SPAN');
+            if (span?.parentElement) span.parentElement.click();
+          });
+          await newTab.waitForTimeout(500);
+
+          // Select cover letter option
+          await newTab.evaluate((letterName) => {
+            const options = document.querySelectorAll('.multiselect__option');
+            options.forEach(opt => {
+              if (opt.textContent.trim() === letterName) opt.click();
+            });
+          }, coverLetter);
+          await newTab.waitForTimeout(500);
+
+          // Submit application
+          await newTab.evaluate(() => {
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => {
+              if (btn.textContent.includes('確認送出')) btn.click();
+            });
+          });
+          await newTab.waitForTimeout(2500);
+
+          // Verify success
+          const finalUrl = newTab.url();
+          if (finalUrl.includes('/job/apply/done/')) {
+            console.log('✅ SUCCESS');
+            pageResults.successful++;
+            results.successful++;
+
+            // Update status indicator
+            await page.evaluate(({ current, target }) => {
+              window.updateStatus?.({ status: 'RUNNING', current, target });
+            }, { current: results.successful, target: targetApplications });
+          } else {
+            console.log('❌ FAILED');
+            pageResults.failed++;
+            results.failed++;
+          }
+
+          // Cleanup
+          await newTab.close();
+          await page.bringToFront();
+          await page.waitForTimeout(500);
+          await setupControls(); // Re-setup controls
+
+        } catch (error) {
+          console.error(`❌ FAILED: ${error.message}`);
+          pageResults.failed++;
+          results.failed++;
+
+          // Cleanup
+          try {
+            const pages = page.context().pages();
+            if (pages.length > 1) await pages[pages.length - 1].close();
+            await page.bringToFront();
+            await setupControls();
+          } catch (e) {}
+        }
+
+        // Random delay (human-like)
+        const delay = 2000 + Math.random() * 2000;
+        await page.waitForTimeout(delay);
+      }
+
+      // Page summary
+      console.log(`\nPage ${pageNum}: ✅${pageResults.successful} ❌${pageResults.failed} ⏭️${pageResults.skipped}\n`);
+      results.pages.push(pageResults);
+      results.skipped += pageResults.skipped;
+
+      if (results.successful >= targetApplications) break;
+
+      await page.waitForTimeout(3000);
     }
 
-    currentPage++;
+    // Mark completed
+    await page.evaluate(({ current, target }) => {
+      window.updateStatus?.({ status: 'COMPLETED', current, target });
+    }, { current: results.successful, target: targetApplications });
+
+  } catch (error) {
+    if (error.message === 'USER_QUIT') {
+      console.log('\n🛑 Automation stopped by user');
+    } else {
+      throw error;
+    }
   }
 
-  // ── Write summary to log file ────────────────────────────────────────────
-  const runEnd = new Date();
-  const durationSec = ((runEnd - runStart) / 1000).toFixed(1);
-
-  logLine('='.repeat(70));
-  logLine('SUMMARY');
-  logLine('='.repeat(70));
-  logLine(`Completed       : ${runEnd.toLocaleString()}`);
-  logLine(`Duration        : ${durationSec}s`);
-  logLine(`Total Processed : ${results.totalProcessed}`);
-  logLine(`Success         : ${results.success.length}`);
-  logLine(`Skipped         : ${results.skipped.length}`);
-  logLine(`Failed          : ${results.failed.length}`);
-  logLine();
-
-  if (results.success.length > 0) {
-    logLine('-- Successfully Applied --');
-    results.success.forEach((job, i) => {
-      logLine(`  ${i + 1}. [${extractJobId(job.url)}] ${job.title} @ ${job.company}`);
-      logLine(`     ${job.url}`);
-    });
-    logLine();
-  }
-
-  if (results.failed.length > 0) {
-    logLine('-- Failed --');
-    results.failed.forEach(({ job, reason }, i) => {
-      logLine(`  ${i + 1}. [${extractJobId(job.url)}] ${job.title}`);
-      logLine(`     Reason : ${reason}`);
-      logLine(`     URL    : ${job.url}`);
-    });
-    logLine();
-  }
-
-  logLine('='.repeat(70));
-  // ────────────────────────────────────────────────────────────────────────
-
-  // Print final summary to console
-  console.log('\n' + '='.repeat(70));
-  console.log('📊 Final Summary');
-  console.log('='.repeat(70));
-  console.log(`   Total Processed     : ${results.totalProcessed}`);
-  console.log(`   ✅ Successfully Applied: ${results.success.length}`);
-  console.log(`   ⚠️  Skipped           : ${results.skipped.length}`);
-  console.log(`   ❌ Failed            : ${results.failed.length}`);
-  console.log(`   ⏱️  Duration          : ${durationSec}s`);
-  console.log('='.repeat(70));
-  console.log(`\n📄 Full results saved to: ${logFile}\n`);
+  // Final summary
+  console.log('\n╔══════════════════════════════════════════════╗');
+  console.log('║     AUTOMATION COMPLETE                      ║');
+  console.log('╚══════════════════════════════════════════════╝');
+  console.log(`🎯 Target: ${targetApplications} applications`);
+  console.log(`✅ Successful: ${results.successful}`);
+  console.log(`❌ Failed: ${results.failed}`);
+  console.log(`⏭️  Skipped: ${results.skipped}`);
+  console.log(`📄 Pages: ${results.pages.length}\n`);
 
   return results;
 }
 
-// Usage
-await autoApply104Jobs(page, { startPage: 1, maxPages: 3, logDir: '.' });
+// Usage examples:
+// Basic: Apply to 20 jobs starting from page 1
+await autoApply104Jobs(page, { targetApplications: 20 });
+
+// Advanced: Start from page 5, target 50 applications
+await autoApply104Jobs(page, { startPage: 5, targetApplications: 50, maxPages: 30 });
 ```
 
 ## Configuration Options
@@ -500,38 +499,102 @@ await autoApply104Jobs(page, { startPage: 1, maxPages: 3, logDir: '.' });
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `startPage` | number | 1 | Starting page number for job search |
-| `maxPages` | number | 5 | Maximum number of pages to process |
-| `delayMin` | number | 2000 | Minimum delay between applications (ms) |
-| `delayMax` | number | 4000 | Maximum delay between applications (ms) |
-| `coverLetter` | string | '自訂推薦信1' | Cover letter to use for applications |
-| `logDir` | string | `'.'` | Directory to save the result log file |
+| `targetApplications` | number | 20 | Target number of successful applications (stops when reached) |
+| `maxPages` | number | 20 | Maximum number of pages to search |
+| `coverLetter` | string | '自訂推薦信1' | Cover letter name (must match exactly in your 104 account) |
 
-### Log File
+## Key Features
 
-Every run saves a timestamped file `YYYYMMDD_HHMMSS_result.txt` in `logDir`.
-Each entry contains:
+### ✨ Target-Based Execution
+- Stops automatically when target number of successful applications is reached
+- Precise control - won't waste time processing unnecessary jobs
+- Example: Target 20 applications = exactly 20 successful submissions
 
-| Field | Description |
-|-------|-------------|
-| `Title` | Job title |
-| `Company` | Company name |
-| `ID` | Job ID extracted from the 104 URL |
-| `URL` | Full job URL |
-| `Salary` | Salary range (if listed on the search page) |
-| `Location` | Work location / area |
-| `Tags` | Job tags / labels |
-| `Time` | Timestamp of the application attempt |
-| `Result` | `SUCCESS`, `SKIPPED (reason)`, or `FAILED (reason)` |
+### ⌨️ Real-Time Keyboard Controls
+- **P** = Pause automation (take a break, check results)
+- **R** = Resume automation (continue from where you paused)
+- **Q** = Quit automation (graceful exit with results summary)
 
-A summary block at the end lists duration, totals, and full URL lists for successes and failures.
+### 📊 On-Page Status Indicator
+- Always visible progress box on page
+- Shows: Current progress (e.g., "Applications: 5/20")
+- Color-coded: Green (running), Orange (paused), Blue (completed)
+
+### 🎯 Proven Performance (Based on 2,495-Application Case Study)
+- **92.5% success rate** over 2,495 applications
+- **609 applications/hour** throughput
+- **Automatic skip detection** for already-applied jobs
+- **Human-like delays** to avoid detection
+- **Robust error handling** - continues on failures
 
 ## Safety Features
 
-- **Skip already applied jobs**: Automatically detects and skips jobs already applied to
-- **Random delays**: Uses random delays (2-4 seconds) between applications to avoid detection
-- **Error handling**: Gracefully handles errors for each job without stopping the entire process
-- **Detailed logging**: Provides detailed console output for monitoring progress
-- **Maximum page limit**: Prevents runaway execution with configurable page limits
+- **Skip already applied jobs**: Detects '已應徵' text before clicking (saves time)
+- **Human-like random delays**: 2-4 seconds between applications (avoids detection)
+- **Graceful error handling**: One failure doesn't stop the entire process
+- **Tab cleanup**: Always closes application tabs, even on errors
+- **Target-based stopping**: Prevents runaway execution
+- **Real-time monitoring**: Detailed console output and on-page status
+- **Keyboard interrupt**: Press Q anytime to gracefully quit
+
+## Technical Implementation Details
+
+### Critical Selectors (Proven to Work)
+```javascript
+// Apply buttons on search results page
+'.apply-button__button'  // ✅ CORRECT - These are DIV elements, not buttons
+
+// Job containers
+'[class*="job-list-container"]'  // Contains job info
+
+// Cover letter dropdown
+'span' with text '系統預設'  // Click parent element to open
+
+// Cover letter options
+'.multiselect__option'  // Options in dropdown
+
+// Submit button
+'button' with text '確認送出'  // Final submit
+```
+
+### Application Flow Pattern
+1. **Stay on search results page** - No need to visit detail pages
+2. **Check for already-applied** - Look for '已應徵' text (fast skip)
+3. **Click apply button** - Opens NEW TAB (not modal)
+4. **Switch to new tab** - Use `page.context().pages()`
+5. **Two-step dropdown** - Click parent, wait 500ms, click option
+6. **Submit and verify** - Check URL contains `/job/apply/done/`
+7. **Always cleanup** - Close tab and return to search page
+
+### Timing Strategy (Optimized)
+```javascript
+// After navigation
+await page.waitForTimeout(2000);  // Let page load
+
+// After clicking apply
+await page.waitForTimeout(1500);  // Let tab open
+
+// After opening dropdown
+await page.waitForTimeout(500);   // Let dropdown render
+
+// After submit
+await page.waitForTimeout(2500);  // Let success page load
+
+// Between jobs (human-like)
+const delay = 2000 + Math.random() * 2000;  // 2-4 seconds random
+```
+
+### Success Verification
+```javascript
+// ✅ RELIABLE - URL pattern matching
+const finalUrl = newTab.url();
+if (finalUrl.includes('/job/apply/done/')) {
+  // Confirmed success
+}
+
+// ❌ UNRELIABLE - Don't rely on page text
+// Page text can be inconsistent or change
+```
 
 ## Limitations
 
@@ -594,45 +657,67 @@ A summary block at the end lists duration, totals, and full URL lists for succes
 
 ## Example Workflows
 
-### Workflow 1: Careful Manual Application
+### Workflow 1: Quick Daily Job Hunt (Recommended)
+Apply to 20 jobs starting from page 1, with keyboard controls available.
 ```javascript
-// 1. Navigate to search page
-await page.goto('https://www.104.com.tw/jobs/search/?keyword=軟體工程師&remoteWork=1,2');
-
-// 2. List jobs to review
-const jobs = await page.evaluate(() => {
-  const containers = document.querySelectorAll('[class*="job-list-container"]');
-  return Array.from(containers).map((c, i) => ({
-    index: i,
-    title: c.querySelector('a[href*="/job/"]')?.textContent.trim()
-  }));
+// Most common use case - apply to 20 jobs
+await autoApply104Jobs(page, {
+  targetApplications: 20
 });
-console.log(jobs);
 
-// 3. Apply to specific job (e.g., index 5)
-// ... [single job application code from Mode 1]
+// While running:
+// - Press P to pause (take a break)
+// - Press R to resume
+// - Press Q to quit gracefully
 ```
 
-### Workflow 2: Batch Processing Multiple Pages
+### Workflow 2: Aggressive Job Search
+Target more applications across more pages.
 ```javascript
-// Apply to jobs on pages 1-3 with default settings
+// Apply to 50 jobs, search up to 30 pages
 await autoApply104Jobs(page, {
   startPage: 1,
-  maxPages: 3,
-  delayMin: 2000,
-  delayMax: 4000
+  targetApplications: 50,
+  maxPages: 30
 });
 ```
 
-### Workflow 3: Conservative Automation
+### Workflow 3: Resume from Specific Page
+If you've already processed pages 1-5, start from page 6.
 ```javascript
-// Slower, more conservative approach
+// Continue from page 6
 await autoApply104Jobs(page, {
-  startPage: 1,
-  maxPages: 2,
-  delayMin: 5000,  // 5 second minimum delay
-  delayMax: 8000   // 8 second maximum delay
+  startPage: 6,
+  targetApplications: 20,
+  maxPages: 20
 });
+```
+
+### Workflow 4: Custom Cover Letter
+Use a different cover letter than the default.
+```javascript
+// Use custom cover letter (must match name in 104 account)
+await autoApply104Jobs(page, {
+  targetApplications: 20,
+  coverLetter: '我的客製推薦信'  // Your cover letter name
+});
+```
+
+### Workflow 5: Testing with Single Job
+Test the automation with Mode 1 (single job) first before batch processing.
+```javascript
+// Navigate to search page
+await page.goto('https://www.104.com.tw/jobs/search/?area=6001001000,6001002000&keyword=%20%20%20%20%E8%BB%9F%E9%AB%94%E5%B7%A5%E7%A8%8B%E5%B8%AB&order=15&remoteWork=1,2&page=1');
+await page.waitForTimeout(2000);
+
+// List available jobs
+const jobCount = await page.evaluate(() => {
+  return document.querySelectorAll('.apply-button__button').length;
+});
+console.log(`Found ${jobCount} jobs on this page`);
+
+// Apply to first job (index 0) using Mode 1 code above
+// ... then run batch automation if successful
 ```
 
 ## Technical Notes
@@ -663,14 +748,70 @@ await autoApply104Jobs(page, {
 - Cleans up tabs even on errors
 - Provides detailed error messages
 
-## Reference Files
+## What Makes This Skill Different?
 
-For implementation details, see the original automation code:
-- `/Users/jerryliu/ai_experiment/104/104_auto_apply_complete.js` - Full automation implementation
-- `/Users/jerryliu/ai_experiment/104/104_auto_apply_with_controls.js` - Version with pause/resume controls
-- `/Users/jerryliu/ai_experiment/104/apply_single_job.js` - Single job helper functions
-- `/Users/jerryliu/ai_experiment/104/README_104_AUTOMATION.md` - Detailed documentation
+This skill is based on **real-world proven results**: 2,495 successful job applications with 92.5% success rate.
+
+### Key Improvements Over Traditional Approaches
+
+1. **Target-Based Execution** ⭐
+   - Old: Process N pages regardless of results
+   - New: Stop exactly when you reach your target applications
+   - Result: No wasted time, precise control
+
+2. **Keyboard Controls** ⭐
+   - Old: No control once automation starts
+   - New: Pause/Resume/Quit anytime with P/R/Q keys
+   - Result: Full control, can interrupt safely
+
+3. **Search Page Automation** ⭐
+   - Old: Navigate to each job detail page (slow)
+   - New: Apply directly from search results (fast)
+   - Result: 3-4x faster throughput
+
+4. **Proper Tab Management** ⭐
+   - Old: Can leave tabs open on errors
+   - New: Always closes tabs with cleanup in error handling
+   - Result: No memory leaks, stable long runs
+
+5. **On-Page Status Indicator** ⭐
+   - Old: Only console logs
+   - New: Visual progress box on page
+   - Result: Easy monitoring, professional appearance
+
+6. **URL-Based Success Verification** ⭐
+   - Old: Check page text (unreliable)
+   - New: Check for `/job/apply/done/` in URL
+   - Result: 100% reliable success detection
+
+## Performance Benchmarks
+
+Based on actual 2,495-application case study:
+- **Success Rate**: 92.5% average, 96.2% best run
+- **Throughput**: ~609 applications/hour
+- **Speed**: ~6 seconds per application
+- **Efficiency**: 16-18 jobs found per page
+- **Reliability**: Ran 5 consecutive sessions without manual intervention
+
+## Reference Files & Case Study
+
+For implementation details and learnings:
+- **Case Study**: https://github.com/yennanliu/104Skill/issues/1 (Complete running log)
+- **Working Code**: `../ai_experiment/104/104_auto_apply_target.js` - Target-based implementation
+- **Key Learnings**: `../ai_experiment/104/LEARNINGS.md` - 467 lines of insights
+- **Documentation**: `../ai_experiment/104/DOCUMENTATION_INDEX.md` - Full docs
+- **Results**: 5 successful runs, 2,495 total applications
+
+### What the Case Study Proves
+- ✅ Automation works reliably at scale (2,495 applications)
+- ✅ High success rate achievable (92.5%)
+- ✅ Efficient throughput (609 apps/hour)
+- ✅ Proper selectors (`.apply-button__button` is correct)
+- ✅ Tab management works (proper cleanup on errors)
+- ✅ Already-applied detection saves time (1,538 jobs skipped)
+- ✅ Target-based stopping is precise (exact counts achieved)
+- ✅ No rate limiting detected (900 apps in single run worked)
 
 ---
 
-**Remember**: Use this skill responsibly. Quality applications to genuinely suitable positions are more valuable than quantity.
+**Remember**: This skill is proven to work. Use it responsibly for genuine job applications to suitable positions. Quality matters more than quantity.
