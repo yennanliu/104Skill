@@ -1,0 +1,109 @@
+{
+  "runMetadata": {
+    "timestamp": "2026-02-27T10:30:00+08:00",
+    "duration": "18m 30s",
+    "config": {
+      "startPage": 1,
+      "targetApplications": 20,
+      "maxPages": 20,
+      "coverLetter": "自訂推薦信1"
+    }
+  },
+  "summary": {
+    "successful": 20,
+    "failed": 2,
+    "skipped": 15,
+    "totalProcessed": 37,
+    "pagesSearched": 3,
+    "successRate": "90.9%",
+    "targetReached": true
+  },
+  "pageResults": [
+    {
+      "pageNumber": 1,
+      "successful": 8,
+      "failed": 1,
+      "skipped": 9,
+      "jobsFound": 18,
+      "duration": "6m 15s"
+    },
+    {
+      "pageNumber": 2,
+      "successful": 10,
+      "failed": 1,
+      "skipped": 5,
+      "jobsFound": 16,
+      "duration": "7m 10s"
+    },
+    {
+      "pageNumber": 3,
+      "successful": 2,
+      "failed": 0,
+      "skipped": 1,
+      "jobsFound": 3,
+      "duration": "1m 25s",
+      "note": "Stopped early - target reached"
+    }
+  },
+  "appliedJobs": [
+    {
+      "title": "Senior Software Engineer",
+      "company": "某科技公司",
+      "status": "success",
+      "appliedAt": "2026-02-27T10:32:15+08:00"
+    },
+    {
+      "title": "Full Stack Developer",
+      "company": "新創團隊",
+      "status": "success",
+      "appliedAt": "2026-02-27T10:35:22+08:00"
+    },
+    {
+      "title": "Backend Engineer",
+      "company": "大型企業",
+      "status": "success",
+      "appliedAt": "2026-02-27T10:38:45+08:00"
+    }
+  ],
+  "failedJobs": [
+    {
+      "title": "DevOps Engineer",
+      "company": "某公司",
+      "status": "failed",
+      "reason": "Cover letter dropdown not found",
+      "failedAt": "2026-02-27T10:42:10+08:00"
+    },
+    {
+      "title": "Product Manager",
+      "company": "另一公司",
+      "status": "failed",
+      "reason": "Submit button timeout",
+      "failedAt": "2026-02-27T10:56:30+08:00"
+    }
+  ],
+  "skippedJobs": [
+    {
+      "title": "前端工程師",
+      "company": "已應徵公司",
+      "status": "skipped",
+      "reason": "Already applied"
+    },
+    {
+      "title": "資深軟體工程師",
+      "company": "另一已應徵公司",
+      "status": "skipped",
+      "reason": "Already applied"
+    }
+  ],
+  "performance": {
+    "avgTimePerJob": "6.2s",
+    "avgTimePerPage": "4m 56s",
+    "jobsPerPage": 12.3,
+    "applicationsPerHour": 65
+  },
+  "recommendations": [
+    "Great success rate! Continue with current search criteria",
+    "15 jobs skipped (already applied) - consider expanding search area",
+    "2 failures detected - verify cover letter name and form availability"
+  ]
+}

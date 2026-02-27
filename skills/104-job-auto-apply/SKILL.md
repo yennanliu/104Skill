@@ -475,6 +475,118 @@ Based on actual 2,495-application case study:
 - **Efficiency**: 16-18 jobs found per page
 - **Reliability**: Ran 5 consecutive sessions without manual intervention
 
+## Frequently Asked Questions
+
+### General Questions
+
+**Q: How do I know if the automation is working?**
+A: Watch for the on-page status indicator (green box in top-right corner) and console output showing "✅ SUCCESS" messages. Run a dry-run or test with 3 jobs first.
+
+**Q: Can I pause the automation?**
+A: Yes! Press **P** to pause, **R** to resume, **Q** to quit gracefully at any time during execution.
+
+**Q: What if I get rate limited?**
+A: Based on 2,495-application case study, no rate limiting was detected up to 900 applications in a single session. The automation uses human-like delays (2-4 seconds) to avoid detection.
+
+**Q: How long does it take to apply to 20 jobs?**
+A: Approximately 2-3 minutes. Based on case study data: ~6 seconds per job × 20 jobs = 120 seconds, plus page navigation time.
+
+**Q: Can I run this overnight?**
+A: Not recommended. The automation requires an active browser session and may encounter errors that need attention. Best run in 20-50 job batches while monitoring.
+
+### Setup & Configuration
+
+**Q: How do I find my cover letter name?**
+A: Log in to 104.com.tw → Go to "Resume/Documents" section → Note the exact name of your cover letter (e.g., "自訂推薦信1"). It must match exactly.
+
+**Q: What if my cover letter name is different?**
+A: Change the `coverLetter` parameter: `await autoApply104Jobs(page, { coverLetter: 'YOUR_EXACT_NAME' })`
+
+**Q: Do I need to be logged in first?**
+A: Yes! You must be logged in to 104.com.tw before running the automation. The script cannot log you in automatically.
+
+**Q: What search URL should I use?**
+A: See `examples/search-urls.md` for templates, or build your own by using 104's search UI and copying the URL.
+
+### Troubleshooting
+
+**Q: "No jobs found" - what's wrong?**
+A: Check that you're on a job search results page, not the homepage. Navigate to your search page first with `await page.goto('YOUR_SEARCH_URL')`.
+
+**Q: "Cover letter not found" error?**
+A: Your cover letter name doesn't match. Run a single job test to see available cover letters: `await testApplicationFlow(page, 'TEST_NAME')`.
+
+**Q: Applications failing frequently?**
+A: Run the validation script first: `await validateSetup(page, { coverLetter: 'YOUR_NAME' })`. Also check internet connection and verify login status.
+
+**Q: Browser crashes after many applications?**
+A: Close and restart browser between sessions. Process in smaller batches (20-50 instead of 100+). Chrome may run out of memory on very long sessions.
+
+**Q: "Already applied" to all jobs?**
+A: You've applied to all available jobs in your search. Expand search criteria (more locations, different keywords) or try again tomorrow when new jobs are posted.
+
+### Strategy & Best Practices
+
+**Q: How many jobs should I apply to per day?**
+A: Recommended: 20-30 per day for quality. Case study showed 609 apps/hour is possible, but focus on jobs you're genuinely interested in.
+
+**Q: Should I apply to every job?**
+A: No. Use search filters to target relevant positions. Quality > quantity. Only apply to jobs you'd actually accept.
+
+**Q: What's the best time to apply?**
+A: Early morning (8-10 AM) when jobs are freshly posted and HR is active. The automation sorts by "Latest" to catch new postings.
+
+**Q: Can I use different cover letters for different jobs?**
+A: Yes! Create multiple configs with different cover letters, then run automation separately for each job type (frontend, backend, etc.).
+
+**Q: How often should I run the automation?**
+A: Daily for best results. New jobs are posted throughout the day. Running daily ensures you're among the first applicants.
+
+### Technical Questions
+
+**Q: Does this work with Playwright MCP?**
+A: Yes, it's specifically designed for Playwright MCP in Claude Code. Just copy/paste the functions and run.
+
+**Q: Can I modify the code?**
+A: Yes! All scripts are in `skills/104-job-auto-apply/`. Customize delays, selectors, or flow as needed.
+
+**Q: How do I test without actually applying?**
+A: Use dry-run mode: `await dryRun(page, { targetApplications: 20 })`. It shows what would happen without submitting applications.
+
+**Q: What if 104.com.tw changes their website?**
+A: Run selector tests to detect changes: `await testSelectors(page)`. Update selectors in the scripts if failures detected.
+
+**Q: Can I run this on multiple accounts?**
+A: Yes, but you'll need to switch accounts manually in the browser between runs. Log out, log in to different account, then run automation.
+
+### Results & Tracking
+
+**Q: How do I know which jobs I applied to?**
+A: Check 104.com.tw → "My Job Applications" section. The automation also logs job titles in console output.
+
+**Q: What's a good success rate?**
+A: 90%+ is excellent (case study: 92.5%). Below 80% indicates issues that need fixing.
+
+**Q: Why did some applications fail?**
+A: Common reasons: Network timeout, form changed, cover letter not found, page didn't load fully. Check console output for specific error messages.
+
+**Q: Can I export results?**
+A: Results are returned as a JavaScript object. See `examples/sample-results.json` for format. You can log or save this data.
+
+### Safety & Ethics
+
+**Q: Is this legal?**
+A: Automation itself is generally legal for personal use. However, check 104.com.tw Terms of Service and use responsibly. Don't spam applications.
+
+**Q: Will I get banned?**
+A: Unlikely if used responsibly. The automation uses human-like delays and follows normal application flow. Case study: 2,495 applications with no issues.
+
+**Q: Should I apply to jobs I'm not qualified for?**
+A: No. Use search filters to find suitable positions. Applying to irrelevant jobs wastes everyone's time and may harm your reputation.
+
+**Q: What about privacy?**
+A: The automation only interacts with public job listings and your own application data. No data is stored or transmitted outside your local environment.
+
 ## Reference Files & Case Study
 
 For implementation details and learnings:
