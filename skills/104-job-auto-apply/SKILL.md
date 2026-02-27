@@ -19,6 +19,16 @@ Use this skill when:
 - **Scale applications**: Proven to handle hundreds of applications reliably
 - **Resume from interruption**: Continue from specific page after breaks
 
+## Script Files
+
+This skill includes ready-to-use JavaScript files:
+
+- **[`autoApply104Jobs.js`](./autoApply104Jobs.js)** - Main automation with target-based execution and keyboard controls (~340 lines)
+- **[`applySingleJob.js`](./applySingleJob.js)** - Helper functions for single job application and listing (~120 lines)
+- **[`README.md`](./README.md)** - Script documentation and usage guide
+
+Simply copy/paste the functions into your Playwright MCP code block to use them.
+
 ## Prerequisites
 
 Before using this skill, ensure:
@@ -61,92 +71,48 @@ For testing local modifications:
 
 ### Mode 1: Single Job Application (Manual Testing)
 
-Use this for testing or applying to one job at a time.
+Use this for testing or applying to one job at a time. Perfect for verifying the automation works before running batch jobs.
 
-**Step 1: Navigate to job search page**
+**Implementation:**
+
+Helper functions are available in [`applySingleJob.js`](./applySingleJob.js).
+
+**Quick Usage:**
 ```javascript
-await page.goto('https://www.104.com.tw/jobs/search/?area=6001001000,6001002000&jobsource=joblist_search&keyword=%20%20%20%20%E8%BB%9F%E9%AB%94%E5%B7%A5%E7%A8%8B%E5%B8%AB&order=15&page=1&remoteWork=1,2');
+// Copy/paste the functions from applySingleJob.js, then:
+
+// Step 1: Navigate to search page
+await page.goto('https://www.104.com.tw/jobs/search/?area=6001001000,6001002000&keyword=%E8%BB%9F%E9%AB%94%E5%B7%A5%E7%A8%8B%E5%B8%AB&order=15&remoteWork=1,2&page=1');
 await page.waitForTimeout(2000);
-```
 
-**Step 2: List available jobs**
-```javascript
-const jobs = await page.evaluate(() => {
-  const containers = document.querySelectorAll('[class*="job-list-container"]');
-  const jobs = [];
-
-  containers.forEach((container, index) => {
-    const titleLink = container.querySelector('a[href*="/job/"]');
-    const title = titleLink ? titleLink.textContent.trim() : 'Unknown';
-
-    const companyElement = container.querySelector('[class*="company"]');
-    const company = companyElement ? companyElement.textContent.trim() : 'Unknown';
-
-    const alreadyApplied = container.textContent.includes('已應徵');
-
-    jobs.push({
-      index: index,
-      title: title.substring(0, 60),
-      company: company.substring(0, 40),
-      alreadyApplied: alreadyApplied
-    });
-  });
-
-  return jobs;
-});
-
+// Step 2: List available jobs
+const jobs = await listJobs(page);
 console.log('Available jobs:', jobs);
+// Output: [{ index: 0, title: "軟體工程師", company: "...", alreadyApplied: false }, ...]
+
+// Step 3: Apply to first job (index 0)
+const result = await applySingleJob(page, 0, '自訂推薦信1');
+console.log(result);
+// Output: { status: 'success', job: {...}, finalUrl: '...' }
+
+// Step 4: Apply to another job (index 2)
+const result2 = await applySingleJob(page, 2, '自訂推薦信1');
 ```
 
-**Step 3: Apply to a single job**
+**Returns:**
 ```javascript
-// Click apply button for job at index 0
-await page.evaluate(() => {
-  const buttons = document.querySelectorAll('.apply-button__button');
-  buttons[0].click(); // Change index for different jobs
-});
-await page.waitForTimeout(2000);
-
-// Get the new tab that opened
-const pages = await page.context().pages();
-const newTab = pages[pages.length - 1];
-await newTab.bringToFront();
-await newTab.waitForTimeout(1000);
-
-// Select cover letter
-await newTab.evaluate(() => {
-  const span = Array.from(document.querySelectorAll('span'))
-    .find(el => el.textContent === '系統預設' && el.tagName === 'SPAN');
-  if (span?.parentElement) span.parentElement.click();
-});
-await newTab.waitForTimeout(500);
-
-await newTab.evaluate(() => {
-  const options = document.querySelectorAll('.multiselect__option');
-  options.forEach(opt => {
-    if (opt.textContent.trim() === '自訂推薦信1') opt.click();
-  });
-});
-await newTab.waitForTimeout(500);
-
-// Submit application
-await newTab.evaluate(() => {
-  const buttons = document.querySelectorAll('button');
-  buttons.forEach(btn => {
-    if (btn.textContent.includes('確認送出')) btn.click();
-  });
-});
-await newTab.waitForTimeout(2000);
-
-// Verify success
-const finalUrl = newTab.url();
-const success = finalUrl.includes('/job/apply/done/');
-console.log(success ? '✅ Application submitted successfully!' : '❌ Application may have failed');
-
-// Close tab and return to main page
-await newTab.close();
-await page.bringToFront();
+{
+  status: 'success' | 'failed' | 'skipped' | 'error',
+  job: {
+    title: "軟體工程師",
+    company: "某科技公司",
+    alreadyApplied: false
+  },
+  finalUrl: "https://www.104.com.tw/job/apply/done/..."
+}
 ```
+
+> **💡 Tip**: Always test with Mode 1 (single job) before running batch automation to verify your cover letter name is correct and the flow works.
 
 ### Mode 2: Target-Based Automation with Keyboard Controls
 
@@ -170,329 +136,45 @@ const options = {
 };
 ```
 
-**Complete automation function (based on proven 2,495-application case study):**
+**Implementation:**
+
+The complete automation function is available in [`autoApply104Jobs.js`](./autoApply104Jobs.js).
+
+**Quick Usage:**
 ```javascript
-async function autoApply104Jobs(page, options = {}) {
-  const {
-    startPage = 1,
-    targetApplications = 20,
-    maxPages = 20,
-    coverLetter = '自訂推薦信1'
-  } = options;
+// Copy/paste the function from autoApply104Jobs.js, then run:
 
-  console.log(`🚀 Starting Automation - Target: ${targetApplications} applications\n`);
-  console.log('Keyboard Controls:');
-  console.log('  P = Pause automation');
-  console.log('  R = Resume automation');
-  console.log('  Q = Quit automation\n');
-
-  const results = {
-    successful: 0,
-    failed: 0,
-    skipped: 0,
-    pages: []
-  };
-
-  const BASE_URL = 'https://www.104.com.tw/jobs/search/?area=6001001000,6001002000&jobsource=joblist_search&keyword=%20%20%20%20%E8%BB%9F%E9%AB%94%E5%B7%A5%E7%A8%8B%E5%B8%AB&order=15&remoteWork=1,2';
-
-  // Helper: Check user keyboard control
-  async function checkUserControl() {
-    const control = await page.evaluate(() => ({
-      paused: window.automationControl?.paused || false,
-      quit: window.automationControl?.quit || false
-    }));
-
-    if (control.quit) throw new Error('USER_QUIT');
-
-    if (control.paused) {
-      await page.evaluate(() => window.updateStatus({ status: 'PAUSED', current: 0, target: 0 }));
-      console.log('⏸️  Automation paused. Press R to resume...');
-
-      while (true) {
-        await page.waitForTimeout(1000);
-        const newControl = await page.evaluate(() => ({
-          paused: window.automationControl?.paused || false,
-          quit: window.automationControl?.quit || false
-        }));
-
-        if (newControl.quit) throw new Error('USER_QUIT');
-        if (!newControl.paused) {
-          await page.evaluate(() => window.updateStatus({ status: 'RUNNING', current: 0, target: 0 }));
-          console.log('▶️  Automation resumed!');
-          break;
-        }
-      }
-    }
-  }
-
-  // Setup keyboard controls
-  async function setupControls() {
-    await page.evaluate(({ current, target }) => {
-      // Create status indicator
-      const existing = document.getElementById('automation-status');
-      if (existing) existing.remove();
-
-      const statusBox = document.createElement('div');
-      statusBox.id = 'automation-status';
-      statusBox.style.cssText = `
-        position: fixed; top: 20px; right: 20px;
-        background: #4CAF50; color: white;
-        padding: 15px 20px; border-radius: 8px;
-        font-family: monospace; font-size: 14px;
-        font-weight: bold; z-index: 999999;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      `;
-      statusBox.innerHTML = `
-        🤖 AUTOMATION RUNNING<br>
-        <small>Applications: ${current}/${target}</small><br>
-        <small>P=Pause | R=Resume | Q=Quit</small>
-      `;
-      document.body.appendChild(statusBox);
-
-      // Update status function
-      window.updateStatus = function(params) {
-        const { status, current, target } = params;
-        const box = document.getElementById('automation-status');
-        if (!box) return;
-
-        if (status === 'RUNNING') {
-          box.style.background = '#4CAF50';
-          box.innerHTML = `
-            🤖 AUTOMATION RUNNING<br>
-            <small>Applications: ${current}/${target}</small><br>
-            <small>P=Pause | R=Resume | Q=Quit</small>
-          `;
-        } else if (status === 'PAUSED') {
-          box.style.background = '#FF9800';
-          box.innerHTML = `
-            ⏸️ AUTOMATION PAUSED<br>
-            <small>Applications: ${current}/${target}</small><br>
-            <small>Press R to Resume | Q to Quit</small>
-          `;
-        } else if (status === 'COMPLETED') {
-          box.style.background = '#2196F3';
-          box.innerHTML = `
-            ✅ TARGET REACHED!<br>
-            <small>Completed: ${current}/${target}</small><br>
-            <small>Click to close</small>
-          `;
-        }
-      };
-
-      // Setup keyboard listeners
-      window.automationControl = { paused: false, quit: false };
-      document.addEventListener('keydown', (e) => {
-        if (e.key.toLowerCase() === 'p') {
-          window.automationControl.paused = true;
-          console.log('⏸️  AUTOMATION PAUSED by user');
-        } else if (e.key.toLowerCase() === 'r') {
-          window.automationControl.paused = false;
-          console.log('▶️  AUTOMATION RESUMED by user');
-        } else if (e.key.toLowerCase() === 'q') {
-          window.automationControl.quit = true;
-          console.log('🛑 AUTOMATION QUIT by user');
-        }
-      });
-    }, { current: 0, target: targetApplications });
-  }
-
-  try {
-    for (let pageNum = startPage; pageNum <= maxPages; pageNum++) {
-      // Check if target reached
-      if (results.successful >= targetApplications) {
-        console.log(`\n🎯 Target reached! Applied to ${results.successful} jobs.`);
-        break;
-      }
-
-      await checkUserControl();
-
-      console.log(`\n╔════════════════════════════════════════╗`);
-      console.log(`║  PAGE ${pageNum}                               ║`);
-      console.log(`╚════════════════════════════════════════╝\n`);
-
-      const pageResults = { pageNumber: pageNum, successful: 0, failed: 0, skipped: 0 };
-
-      // Navigate to page
-      const pageUrl = `${BASE_URL}&page=${pageNum}`;
-      await page.goto(pageUrl, { waitUntil: 'networkidle', timeout: 30000 });
-      await page.waitForTimeout(2000);
-
-      // Setup controls after navigation
-      await setupControls();
-
-      // Count jobs on page
-      const jobCount = await page.evaluate(() => {
-        return document.querySelectorAll('.apply-button__button').length;
-      });
-
-      if (jobCount === 0) {
-        console.log('⚠️  No jobs found. Stopping.');
-        break;
-      }
-
-      console.log(`Found ${jobCount} jobs\n`);
-
-      // Process each job
-      for (let jobIndex = 0; jobIndex < jobCount; jobIndex++) {
-        if (results.successful >= targetApplications) {
-          console.log(`\n🎯 Target reached!`);
-          break;
-        }
-
-        await checkUserControl();
-
-        console.log(`\n━━━━ Job ${jobIndex + 1}/${jobCount} ━━━━`);
-
-        try {
-          // Get job info
-          const jobInfo = await page.evaluate((index) => {
-            const containers = document.querySelectorAll('[class*="job-list-container"]');
-            if (index >= containers.length) return null;
-
-            const container = containers[index];
-            const titleLink = container.querySelector('a[href*="/job/"]');
-            const title = titleLink ? titleLink.textContent.trim() : 'Unknown';
-            const companyEl = container.querySelector('[class*="company"]');
-            const company = companyEl ? companyEl.textContent.trim() : 'Unknown';
-            const alreadyApplied = container.textContent.includes('已應徵');
-
-            return { title: title.substring(0, 60), company: company.substring(0, 40), alreadyApplied };
-          }, jobIndex);
-
-          if (!jobInfo) break;
-
-          console.log(`📋 ${jobInfo.title}`);
-
-          if (jobInfo.alreadyApplied) {
-            console.log('⏭️  SKIPPED');
-            pageResults.skipped++;
-            await page.waitForTimeout(1000);
-            continue;
-          }
-
-          // Click apply button
-          await page.evaluate((index) => {
-            document.querySelectorAll('.apply-button__button')[index].click();
-          }, jobIndex);
-          await page.waitForTimeout(1500);
-
-          // Switch to new tab
-          const pages = page.context().pages();
-          const newTab = pages[pages.length - 1];
-          await newTab.bringToFront();
-          await newTab.waitForTimeout(1500);
-
-          // Select cover letter dropdown
-          await newTab.evaluate(() => {
-            const span = Array.from(document.querySelectorAll('span'))
-              .find(el => el.textContent === '系統預設' && el.tagName === 'SPAN');
-            if (span?.parentElement) span.parentElement.click();
-          });
-          await newTab.waitForTimeout(500);
-
-          // Select cover letter option
-          await newTab.evaluate((letterName) => {
-            const options = document.querySelectorAll('.multiselect__option');
-            options.forEach(opt => {
-              if (opt.textContent.trim() === letterName) opt.click();
-            });
-          }, coverLetter);
-          await newTab.waitForTimeout(500);
-
-          // Submit application
-          await newTab.evaluate(() => {
-            const buttons = document.querySelectorAll('button');
-            buttons.forEach(btn => {
-              if (btn.textContent.includes('確認送出')) btn.click();
-            });
-          });
-          await newTab.waitForTimeout(2500);
-
-          // Verify success
-          const finalUrl = newTab.url();
-          if (finalUrl.includes('/job/apply/done/')) {
-            console.log('✅ SUCCESS');
-            pageResults.successful++;
-            results.successful++;
-
-            // Update status indicator
-            await page.evaluate(({ current, target }) => {
-              window.updateStatus?.({ status: 'RUNNING', current, target });
-            }, { current: results.successful, target: targetApplications });
-          } else {
-            console.log('❌ FAILED');
-            pageResults.failed++;
-            results.failed++;
-          }
-
-          // Cleanup
-          await newTab.close();
-          await page.bringToFront();
-          await page.waitForTimeout(500);
-          await setupControls(); // Re-setup controls
-
-        } catch (error) {
-          console.error(`❌ FAILED: ${error.message}`);
-          pageResults.failed++;
-          results.failed++;
-
-          // Cleanup
-          try {
-            const pages = page.context().pages();
-            if (pages.length > 1) await pages[pages.length - 1].close();
-            await page.bringToFront();
-            await setupControls();
-          } catch (e) {}
-        }
-
-        // Random delay (human-like)
-        const delay = 2000 + Math.random() * 2000;
-        await page.waitForTimeout(delay);
-      }
-
-      // Page summary
-      console.log(`\nPage ${pageNum}: ✅${pageResults.successful} ❌${pageResults.failed} ⏭️${pageResults.skipped}\n`);
-      results.pages.push(pageResults);
-      results.skipped += pageResults.skipped;
-
-      if (results.successful >= targetApplications) break;
-
-      await page.waitForTimeout(3000);
-    }
-
-    // Mark completed
-    await page.evaluate(({ current, target }) => {
-      window.updateStatus?.({ status: 'COMPLETED', current, target });
-    }, { current: results.successful, target: targetApplications });
-
-  } catch (error) {
-    if (error.message === 'USER_QUIT') {
-      console.log('\n🛑 Automation stopped by user');
-    } else {
-      throw error;
-    }
-  }
-
-  // Final summary
-  console.log('\n╔══════════════════════════════════════════════╗');
-  console.log('║     AUTOMATION COMPLETE                      ║');
-  console.log('╚══════════════════════════════════════════════╝');
-  console.log(`🎯 Target: ${targetApplications} applications`);
-  console.log(`✅ Successful: ${results.successful}`);
-  console.log(`❌ Failed: ${results.failed}`);
-  console.log(`⏭️  Skipped: ${results.skipped}`);
-  console.log(`📄 Pages: ${results.pages.length}\n`);
-
-  return results;
-}
-
-// Usage examples:
-// Basic: Apply to 20 jobs starting from page 1
+// Basic: Apply to 20 jobs
 await autoApply104Jobs(page, { targetApplications: 20 });
 
-// Advanced: Start from page 5, target 50 applications
-await autoApply104Jobs(page, { startPage: 5, targetApplications: 50, maxPages: 30 });
+// Advanced: Custom configuration
+await autoApply104Jobs(page, {
+  startPage: 1,              // Start from page 1
+  targetApplications: 50,    // Target 50 applications
+  maxPages: 30,              // Search up to 30 pages
+  coverLetter: '自訂推薦信1'   // Your cover letter name
+});
+
+// While running, use keyboard controls:
+// - Press P to pause
+// - Press R to resume
+// - Press Q to quit gracefully
 ```
+
+**Returns:**
+```javascript
+{
+  successful: 15,     // Number of successful applications
+  failed: 2,          // Number of failed applications
+  skipped: 10,        // Number of skipped (already applied)
+  pages: [            // Per-page details
+    { pageNumber: 1, successful: 8, failed: 1, skipped: 5 },
+    { pageNumber: 2, successful: 7, failed: 1, skipped: 5 }
+  ]
+}
+```
+
+> **💡 Tip**: For full implementation details, see [`autoApply104Jobs.js`](./autoApply104Jobs.js). The script is ~340 lines with comprehensive error handling, keyboard controls, and status indicator setup.
 
 ## Configuration Options
 
