@@ -77,7 +77,7 @@ async function testApplicationFlow(page, coverLetter = '自訂推薦信1') {
       const buttons = document.querySelectorAll('.apply-button__button');
       if (buttons[index]) buttons[index].click();
     }, jobIndex);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1000);
 
     const newTabCount = page.context().pages().length;
     const tabOpened = newTabCount > initialTabCount;
@@ -95,7 +95,7 @@ async function testApplicationFlow(page, coverLetter = '自訂推薦信1') {
     const pages = page.context().pages();
     const newTab = pages[pages.length - 1];
     await newTab.bringToFront();
-    await newTab.waitForTimeout(1500);
+    await newTab.waitForTimeout(1000);
 
     const formUrl = newTab.url();
     step('Switch to new tab', true, `URL: ${formUrl}`);

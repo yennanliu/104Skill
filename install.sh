@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Installation script for 104 Job Auto-Apply Claude Code Skill
+# Installation script for 104 Job Auto-Apply Skill
+# Installs for: Claude Code and Gemini CLI
 
 set -e  # Exit on error
 
@@ -12,6 +13,7 @@ echo ""
 # Define paths
 SKILL_NAME="104-job-auto-apply"
 SKILLS_DIR="$HOME/.claude/skills/$SKILL_NAME"
+GEMINI_SKILLS_DIR="$HOME/.gemini/skills/$SKILL_NAME"
 CURRENT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Check if SKILL.md exists in current directory
@@ -54,15 +56,17 @@ else
 fi
 echo ""
 
-# Create skills directory if it doesn't exist
-echo "Creating skills directory..."
+# -----------------------------------------------
+# Install for Claude Code
+# -----------------------------------------------
+echo "==========================================="
+echo "Installing for Claude Code..."
+echo "==========================================="
 mkdir -p "$SKILLS_DIR"
 
-# Copy SKILL.md to skills directory
 echo "📄 Installing SKILL.md..."
 cp "$CURRENT_DIR/SKILL.md" "$SKILLS_DIR/"
 
-# Optional: Copy other documentation
 if [ -f "$CURRENT_DIR/README.md" ]; then
     echo "📄 Installing README.md..."
     cp "$CURRENT_DIR/README.md" "$SKILLS_DIR/"
@@ -73,22 +77,49 @@ if [ -f "$CURRENT_DIR/USAGE_EXAMPLES.md" ]; then
     cp "$CURRENT_DIR/USAGE_EXAMPLES.md" "$SKILLS_DIR/"
 fi
 
+echo "✅ Claude Code: installed to $SKILLS_DIR"
 echo ""
+
+# -----------------------------------------------
+# Install for Gemini CLI
+# -----------------------------------------------
+echo "==========================================="
+echo "Installing for Gemini CLI..."
+echo "==========================================="
+mkdir -p "$GEMINI_SKILLS_DIR"
+
+echo "📄 Installing SKILL.md..."
+cp "$CURRENT_DIR/SKILL.md" "$GEMINI_SKILLS_DIR/"
+
+if [ -f "$CURRENT_DIR/README.md" ]; then
+    echo "📄 Installing README.md..."
+    cp "$CURRENT_DIR/README.md" "$GEMINI_SKILLS_DIR/"
+fi
+
+# Copy JS scripts so Gemini CLI can reference them directly
+SKILL_JS_DIR="$CURRENT_DIR/skills/104-job-auto-apply"
+if [ -d "$SKILL_JS_DIR" ]; then
+    echo "📄 Installing automation scripts..."
+    cp "$SKILL_JS_DIR/autoApply104Jobs.js"  "$GEMINI_SKILLS_DIR/"
+    cp "$SKILL_JS_DIR/applySingleJob.js"    "$GEMINI_SKILLS_DIR/" 2>/dev/null || true
+fi
+
+echo "✅ Gemini CLI: installed to $GEMINI_SKILLS_DIR"
+echo ""
+
 echo "==========================================="
 echo "✅ Installation Complete!"
 echo "==========================================="
 echo ""
-echo "Skill installed to: $SKILLS_DIR"
-echo ""
-echo "📖 How to use:"
+echo "📖 Claude Code:"
 echo "   1. Start Claude Code in your terminal"
 echo "   2. Type: /104-job-auto-apply"
 echo "   3. Or ask: 'Help me apply to jobs on 104.com.tw'"
 echo ""
-echo "📚 Documentation:"
-echo "   - Skill guide: $SKILLS_DIR/SKILL.md"
-echo "   - Usage examples: $SKILLS_DIR/USAGE_EXAMPLES.md"
-echo "   - README: $SKILLS_DIR/README.md"
+echo "📖 Gemini CLI:"
+echo "   1. Start Gemini CLI"
+echo "   2. Ask: 'Read ~/.gemini/skills/104-job-auto-apply/SKILL.md and help me apply to jobs'"
+echo "   3. Or: gemini --skill 104-job-auto-apply (if supported by your version)"
 echo ""
 echo "⚠️  Prerequisites:"
 echo "   - 104.com.tw account (logged in)"

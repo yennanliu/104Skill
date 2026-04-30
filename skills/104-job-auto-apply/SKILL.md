@@ -40,7 +40,7 @@ Before using this skill, ensure:
 
 ## Installation
 
-### Claude Code Marketplace (Recommended)
+### Claude Code (Recommended)
 
 ```bash
 claude
@@ -55,12 +55,25 @@ claude
 /104-job-auto-apply
 ```
 
+### Gemini CLI
+
+```bash
+# Run the installer (installs to both Claude Code and Gemini CLI paths)
+git clone https://github.com/yennanliu/104Skill.git
+cd 104Skill
+./install.sh
+
+# The skill is installed to ~/.gemini/skills/104-job-auto-apply/
+# In Gemini CLI, ask it to read the SKILL.md and follow the instructions
+# gemini --skill 104-job-auto-apply
+```
+
 ### Local Development
 
 For testing local modifications:
 
 ```bash
-# Add local marketplace
+# Add local marketplace (Claude Code)
 /plugin marketplace add /path/to/104Skill
 
 # Install from local source
@@ -180,7 +193,7 @@ await autoApply104Jobs(page, {
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `startPage` | number | 1 | Starting page number for job search |
+| `startPage` | number | 2 | Starting page number for job search (page 2 avoids sponsored results) |
 | `targetApplications` | number | 20 | Target number of successful applications (stops when reached) |
 | `maxPages` | number | 20 | Maximum number of pages to search |
 | `coverLetter` | string | '自訂推薦信1' | Cover letter name (must match exactly in your 104 account) |
@@ -248,22 +261,31 @@ await autoApply104Jobs(page, {
 6. **Submit and verify** - Check URL contains `/job/apply/done/`
 7. **Always cleanup** - Close tab and return to search page
 
-### Timing Strategy (Optimized)
+### Timing Strategy (Confirmed Working)
 ```javascript
 // After navigation
 await page.waitForTimeout(2000);  // Let page load
 
-// After clicking apply
-await page.waitForTimeout(1500);  // Let tab open
+// After clicking apply button
+await page.waitForTimeout(1000);  // Let new tab open
+
+// After switching to new tab
+await newTab.waitForTimeout(1000);  // Let form load
 
 // After opening dropdown
-await page.waitForTimeout(500);   // Let dropdown render
+await newTab.waitForTimeout(500);   // Let dropdown render
+
+// After selecting cover letter
+await newTab.waitForTimeout(500);   // Let selection register
 
 // After submit
-await page.waitForTimeout(2500);  // Let success page load
+await newTab.waitForTimeout(2000);  // Let success page load
 
 // Between jobs (human-like)
 const delay = 2000 + Math.random() * 2000;  // 2-4 seconds random
+
+// Between pages
+await page.waitForTimeout(5000);  // Avoid rate limiting
 ```
 
 ### Success Verification
@@ -340,9 +362,9 @@ if (finalUrl.includes('/job/apply/done/')) {
 ## Example Workflows
 
 ### Workflow 1: Quick Daily Job Hunt (Recommended)
-Apply to 20 jobs starting from page 1, with keyboard controls available.
+Apply to 20 jobs starting from page 2 (skips sponsored/featured results), with keyboard controls available.
 ```javascript
-// Most common use case - apply to 20 jobs
+// Most common use case - apply to 20 jobs (startPage defaults to 2)
 await autoApply104Jobs(page, {
   targetApplications: 20
 });
